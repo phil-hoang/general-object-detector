@@ -7,16 +7,11 @@ v. 0.01
 import numpy as np
 import cv2 as cv
 
-from ssd_pytorch import ssdModel as ssd
-
 
 
 #%%
 def runProgram():
-    
-    net, predictor = ssd()
-    
-    
+
     # Prepare camera
     cap = cv.VideoCapture(0)
 
