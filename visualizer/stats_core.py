@@ -13,7 +13,7 @@ def showStats(image, stats):
 
 
     fps = stats[0]
-    text = "fps: " + str(fps)
+    text = "fps: {:2.0f}".format(fps)
     cv.putText(image, text, (5, int(image.shape[0]/2)-20), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
 
     inference_time = stats[2] - stats[1]

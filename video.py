@@ -1,5 +1,5 @@
 """
-Main code which provides the functionalities to test different detection models quickly.
+Code to run different models on an input video. Can write the results to a file if selected.
 
 
 
@@ -24,18 +24,19 @@ def runProgram():
     ## Load stuff for ssd
     net, predictor, num_classes, class_names = ssd()
     
-    # Prepare camera
-    cap = cv.VideoCapture(0)
+    # Prepare video input and output
+    cap = cv.VideoCapture("dev/driving_scence_yonge_dundas.mp4")
+    out = cv.VideoWriter('dev/output.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), 12.0, (1280, 720))
 
     if not cap.isOpened():
         print("ERROR! Cannot open camera")
         exit()
 
     ## Create slider
-    cv.namedWindow('Live Detection')
+    cv.namedWindow('Video Detection')
     switch = 'SSD Model'
-    cv.createTrackbar('Show stats', 'Live Detection', 0, 1, nothing)
-    cv.createTrackbar(switch, 'Live Detection', 0, 1, nothing)
+    cv.createTrackbar('Show stats', 'Video Detection', 0, 1, nothing)
+    cv.createTrackbar(switch, 'Video Detection', 0, 1, nothing)
 
     # Initialize list for core stats. [fps, time.start, time.end]
     stats_core = [None, None, None]
@@ -56,8 +57,8 @@ def runProgram():
         # SSD pascal
         stats_core[0] = cap.get(cv.CAP_PROP_FPS)
 
-        ssd_act = cv.getTrackbarPos(switch,'Live Detection')
-        statsFlag = cv.getTrackbarPos('Show stats','Live Detection')
+        ssd_act = cv.getTrackbarPos(switch,'Video Detection')
+        statsFlag = cv.getTrackbarPos('Show stats','Video Detection')
         if ssd_act == 1:
             boxes, labels, probs = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, probs, boxes, labels, class_names)
@@ -71,12 +72,14 @@ def runProgram():
 
 
         # Display the resulting frame
-        cv.imshow('Live Detection', frame)
+        cv.imshow('Video Detection', frame)
+        out.write(frame)
         if cv.waitKey(1) == ord('q'):
             break
 
     # When everything is done, release the capture
     cap.release()
+    out.release()
     cv.destroyAllWindows()
 
 

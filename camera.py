@@ -7,6 +7,7 @@ Main code which provides the functionalities to test different detection models 
 import numpy as np
 import cv2 as cv
 import time
+import sys
 
 from ssd_pytorch.ssd import ssdModel as ssd
 from visualizer.pascal import drawBoxes as pascalBoxes
@@ -21,6 +22,11 @@ def nothing(x):
 #%%
 def runProgram():
     
+    # TODO
+    # Select ssd model if chosen in command line
+    if (len(sys.argv) > 2 and (sys.argv[1] == "-ssd")):
+        print("Selected ssd")
+
     ## Load stuff for ssd
     net, predictor, num_classes, class_names = ssd()
     
@@ -51,7 +57,6 @@ def runProgram():
             break
         image = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
 
-
         ## Insert functions here
         # SSD pascal
         stats_core[0] = cap.get(cv.CAP_PROP_FPS)
@@ -69,7 +74,6 @@ def runProgram():
         if (statsFlag == 1) and (ssd_act == 1):
             frame = statsModel(frame, labels)
 
-
         # Display the resulting frame
         cv.imshow('Live Detection', frame)
         if cv.waitKey(1) == ord('q'):
@@ -79,7 +83,9 @@ def runProgram():
     cap.release()
     cv.destroyAllWindows()
 
-
 if __name__ == '__main__':
+    if (len(sys.argv) > 2 and (sys.argv[1] != "-ssd")):
+        print("Usage: no arg or -<ssd>")
+        exit()
     print("Starting camera ... \nPress q to exit ")
     runProgram()
