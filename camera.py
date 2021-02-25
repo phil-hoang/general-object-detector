@@ -24,11 +24,12 @@ def runProgram():
     
     # TODO
     # Select ssd model if chosen in command line
-    if (len(sys.argv) > 2 and (sys.argv[1] == "-ssd")):
+    if (len(sys.argv) == 2 and (sys.argv[1] == "-ssd")):
         print("Selected ssd")
-
-    ## Load stuff for ssd
-    net, predictor, num_classes, class_names = ssd()
+        ## Load stuff for ssd
+        net, predictor, num_classes, class_names = ssd()
+    else:
+        model_enabled = 0
     
     # Prepare camera
     cap = cv.VideoCapture(0)
@@ -39,15 +40,17 @@ def runProgram():
 
     ## Create slider
     cv.namedWindow('Live Detection')
-    switch = 'SSD Model'
+    switch = 'Model OFF / ON'
     cv.createTrackbar('Show stats', 'Live Detection', 0, 1, nothing)
-    cv.createTrackbar(switch, 'Live Detection', 0, 1, nothing)
+    if (len(sys.argv) == 2 and (sys.argv[1] == "-ssd")):
+        cv.createTrackbar(switch, 'Live Detection', 0, 1, nothing)
 
     # Initialize list for core stats. [fps, time.start, time.end]
     stats_core = [None, None, None]
 
     #%% Loop through each frame
     while True:
+        # Get time before detection
         stats_core[1] = time.time()
         
         # Capture frame-by-frame
@@ -61,17 +64,22 @@ def runProgram():
         # SSD pascal
         stats_core[0] = cap.get(cv.CAP_PROP_FPS)
 
-        ssd_act = cv.getTrackbarPos(switch,'Live Detection')
         statsFlag = cv.getTrackbarPos('Show stats','Live Detection')
-        if ssd_act == 1:
+        if (len(sys.argv) == 2 and (sys.argv[1] == "-ssd")):
+            # If model is selected allow it to be turned on or off
+            model_enabled = cv.getTrackbarPos(switch,'Live Detection')
+        
+        if (len(sys.argv) == 2 and (sys.argv[1] == "-ssd") and model_enabled == 1):
+            #if model_enabled == 1:
             boxes, labels, probs = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, probs, boxes, labels, class_names)
         
+        # Get time after detection
         stats_core[2] = time.time()
         if (statsFlag == 1):
             frame = statsCore(frame, stats_core) 
         
-        if (statsFlag == 1) and (ssd_act == 1):
+        if (statsFlag == 1) and (model_enabled == 1):
             frame = statsModel(frame, labels)
 
         # Display the resulting frame
@@ -84,7 +92,7 @@ def runProgram():
     cv.destroyAllWindows()
 
 if __name__ == '__main__':
-    if (len(sys.argv) > 2 and (sys.argv[1] != "-ssd")):
+    if ((len(sys.argv) == 2 and (sys.argv[1] != "-ssd")) or (len(sys.argv) > 2)):
         print("Usage: no arg or -<ssd>")
         exit()
     print("Starting camera ... \nPress q to exit ")
