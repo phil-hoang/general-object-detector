@@ -2,7 +2,9 @@
 Main code to use different models with a webcam.
 
 Currently supported models and arguments to call it:
-SSD with Mobilenet v1   | -ssd
+SSD with Mobilenet          | -ssdm
+SSD with Mobilenet Lite     | -ssdmlite
+
 
 The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
 """
@@ -26,8 +28,12 @@ def nothing(x):
 def runProgram():
     
     #%% Model selection if chosen in command line
-    if (len(sys.argv) == 2 and (sys.argv[1] == "-ssd")):
-        net, predictor, _, _ = ssd()
+    
+
+    if ( (len(sys.argv) == 2) and (model_type == "-ssdm")):
+        net, predictor = ssd("-ssdm")
+    elif ( (len(sys.argv) == 2) and (model_type == "-ssdmlite")):
+        net, predictor = ssd("-ssdmlite")
     else:
         model_enabled = 0
     
@@ -41,7 +47,7 @@ def runProgram():
     cv.namedWindow('Live Detection')
     switch = 'Model OFF / ON'
     cv.createTrackbar('Show stats', 'Live Detection', 0, 1, nothing)
-    if (len(sys.argv) == 2 and (sys.argv[1] == "-ssd")):
+    if (len(sys.argv) == 2):
         cv.createTrackbar(switch, 'Live Detection', 0, 1, nothing)
 
     # Initialize list for model unrelated core stats. [fps, time.start, time.end]
@@ -62,11 +68,11 @@ def runProgram():
 
         # Set slider to turn on or off stats and enable or disable a model, if a model is selected
         statsFlag = cv.getTrackbarPos('Show stats','Live Detection')
-        if (len(sys.argv) == 2 and (sys.argv[1] == "-ssd")):
+        if (len(sys.argv) == 2):
             model_enabled = cv.getTrackbarPos(switch,'Live Detection')
         
         # Locate objects with model if selected
-        if (len(sys.argv) == 2 and (sys.argv[1] == "-ssd") and model_enabled == 1):
+        if (len(sys.argv) == 2 and model_enabled == 1):
             boxes, labels, probs = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, probs, boxes, labels)
         
@@ -88,10 +94,18 @@ def runProgram():
     cap.release()
     cv.destroyAllWindows()
 
+
 if __name__ == '__main__':
     # Allow no model or selected model
-    if ((len(sys.argv) == 2 and (sys.argv[1] != "-ssd")) or (len(sys.argv) > 2)):
-        print("Usage: no arg or -<ssd>")
+    if (len(sys.argv) == 1 ):
+        model_type = None
+    elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdm")):
+        model_type = "-ssdm"
+    elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdmlite")):
+        model_type = "-ssdmlite"
+    else:
+        print("Usage: no arg or -ssdm or -ssdmlite")
         exit()
+        
     print("Starting camera ... \nPress q to exit ")
     runProgram()
