@@ -3,14 +3,22 @@ import numpy as np
 
 def showStats(image, stats):
     """
-    Adds stats to the side of the image
+    Displays a count of selected objects in the image.
+    Recognized objects are:
+    * Bicycle   | Label 2
+    * Bus       | Label 6
+    * Car       | Label 7
+    * Motorbike | Label 14
+    * Person    | Label 15
+
+    The text is placed below the middle height of the image.
 
     Args:
-    image   - Input image
-    stats   - List with stats to show
+    image - Opencv image object in RGB
+    stats - Torch tensor with label indices of varying lenght.
 
     Returns:
-    image   - Image with stats
+    Image - Opencv image object in RGB with stats
     """
 
     stats = stats.numpy()
@@ -38,6 +46,5 @@ def showStats(image, stats):
 
     text = "signs: " + str(numSign)
     cv.putText(image, text, (5, int(image.shape[0]/2)+120), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
-
 
     return image
