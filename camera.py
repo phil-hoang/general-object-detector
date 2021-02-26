@@ -77,11 +77,10 @@ def runProgram():
         # Locate objects with model if selected
         if (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
             t_image = torch.as_tensor(image, dtype=torch.float32).unsqueeze(0)
-            print(t_image.size())
             t_image = t_image.permute(0, 3, 1, 2)
-            print(t_image.size())
             output = model(t_image)
-            print(output)
+            # output is a dict containing "pred_logits" of [batch_size x num_queries x (num_classes + 1)]
+            # and "pred_boxes" of shape (center_x, center_y, height, width) normalized to be between [0, 1]
 
         elif (len(sys.argv) == 2 and model_enabled == 1):
             boxes, labels, probs = predictor.predict(image, 10, 0.4)
