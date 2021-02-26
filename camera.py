@@ -18,6 +18,7 @@ from ssd_pytorch.ssd import ssdModel as ssd
 from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
+import visualizer.signs as signs
 
 
 # Required for the slider
@@ -47,6 +48,9 @@ def runProgram():
     cv.createTrackbar('Show stats', 'Live Detection', 0, 1, nothing)
     if (len(sys.argv) == 2):
         cv.createTrackbar(switch, 'Live Detection', 0, 1, nothing)
+
+    # Load sign symbols
+    stop_sign = signs.load()[0]
 
     # Initialize list for model unrelated core stats. [fps, time.start, time.end]
     stats_core = [None, None, None]
@@ -82,6 +86,10 @@ def runProgram():
             frame = showCoreStats(frame, stats_core) 
         if (statsFlag == 1) and (model_enabled == 1):
             frame = showModelStats(frame, labels)
+
+        # Enable symbols
+        if (model_enabled == 1):
+            frame = signs.showStopSign(frame, stop_sign, labels, probs)
 
         # Display the resulting frame
         cv.imshow('Live Detection', frame)
