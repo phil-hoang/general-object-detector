@@ -4,6 +4,7 @@ Main code to use different models with a webcam.
 Currently supported models and arguments to call it:
 SSD with Mobilenet          | -ssdm
 SSD with Mobilenet Lite     | -ssdmlite
+DETR                        | -detr
 
 
 The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
@@ -80,6 +81,7 @@ def runProgram():
             t_image = torch.as_tensor(image, dtype=torch.float32).unsqueeze(0)
             t_image = t_image.permute(0, 3, 1, 2)
             output = model(t_image)
+            frame = image   # Until the function above is implemented
             # output is a dict containing "pred_logits" of [batch_size x num_queries x (num_classes + 1)]
             # and "pred_boxes" of shape (center_x, center_y, height, width) normalized to be between [0, 1]
 
@@ -117,7 +119,7 @@ if __name__ == '__main__':
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-detr")):
         model_type = "-detr"
     else:
-        print("Usage: no arg or -ssdm or -ssdmlite")
+        print("Usage: no arg or -ssdm or -ssdmlite or -detr")
         exit()
         
     print("Starting camera ... \nPress q to exit ")
