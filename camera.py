@@ -28,8 +28,6 @@ def nothing(x):
 def runProgram():
     
     #%% Model selection if chosen in command line
-    
-
     if ( (len(sys.argv) == 2) and (model_type == "-ssdm")):
         net, predictor = ssd("-ssdm")
     elif ( (len(sys.argv) == 2) and (model_type == "-ssdmlite")):
