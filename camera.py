@@ -13,6 +13,7 @@ import numpy as np
 import cv2 as cv
 import time
 import sys
+import torch
 
 from ssd_pytorch.ssd import ssdModel as ssd
 from visualizer.pascal import drawBoxes as pascalBoxes
@@ -34,6 +35,8 @@ def runProgram():
         net, predictor = ssd("-ssdm")
     elif ( (len(sys.argv) == 2) and (model_type == "-ssdmlite")):
         net, predictor = ssd("-ssdmlite")
+    elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
+        model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=True)
     else:
         model_enabled = 0
     
@@ -72,7 +75,15 @@ def runProgram():
             model_enabled = cv.getTrackbarPos(switch,'Live Detection')
         
         # Locate objects with model if selected
-        if (len(sys.argv) == 2 and model_enabled == 1):
+        if (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
+            t_image = torch.as_tensor(image, dtype=torch.float32).unsqueeze(0)
+            print(t_image.size())
+            t_image = t_image.permute(0, 3, 1, 2)
+            print(t_image.size())
+            output = model(t_image)
+            print(output)
+
+        elif (len(sys.argv) == 2 and model_enabled == 1):
             boxes, labels, probs = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, probs, boxes, labels)
         
@@ -103,6 +114,8 @@ if __name__ == '__main__':
         model_type = "-ssdm"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdmlite")):
         model_type = "-ssdmlite"
+    elif (len(sys.argv) == 2 and (sys.argv[1] == "-detr")):
+        model_type = "-detr"
     else:
         print("Usage: no arg or -ssdm or -ssdmlite")
         exit()
