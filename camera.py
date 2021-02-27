@@ -15,6 +15,8 @@ import time
 import sys
 
 from ssd_pytorch.ssd import ssdModel as ssd
+from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
+from faster_rcnn.fasterrcnn import predict
 from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
@@ -33,6 +35,8 @@ def runProgram():
         net, predictor = ssd("-ssdm")
     elif ( (len(sys.argv) == 2) and (model_type == "-ssdmlite")):
         net, predictor = ssd("-ssdmlite")
+    elif ( (len(sys.argv) == 2) and (model_type == "-fasterrcnn")):
+            predictor = frcnn()
     else:
         model_enabled = 0
     
@@ -74,9 +78,14 @@ def runProgram():
             model_enabled = cv.getTrackbarPos(switch,'Live Detection')
         
         # Locate objects with model if selected
-        if (len(sys.argv) == 2 and model_enabled == 1):
-            boxes, labels, probs = predictor.predict(image, 10, 0.4)
-            frame = pascalBoxes(image, probs, boxes, labels)
+        #if (len(sys.argv) == 2 and model_enabled == 1):
+        #    boxes, labels, probs = predictor.predict(image, 10, 0.4)
+        #    frame = pascalBoxes(image, probs, boxes, labels)
+
+        ###### FASTER RCNN TEST
+        pred = predict(predictor, image, 10, 1)
+        labels = [1, 1]
+        probs = [1,1]
         
         # Get time after detection
         stats_core[2] = time.time()
@@ -109,8 +118,10 @@ if __name__ == '__main__':
         model_type = "-ssdm"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdmlite")):
         model_type = "-ssdmlite"
+    elif (len(sys.argv) == 2 and (sys.argv[1] == "-fasterrcnn")):
+        model_type = "-fasterrcnn"
     else:
-        print("Usage: no arg or -ssdm or -ssdmlite")
+        print("Usage: no arg or -ssdm or -ssdmlite or -fasterrcnn")
         exit()
         
     print("Starting camera ... \nPress q to exit ")

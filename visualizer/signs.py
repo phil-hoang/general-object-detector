@@ -28,7 +28,7 @@ def showStopSign(frame, stop_sign, labels, conf):
     Returns:
     frame   - Frame with stopsign displayed if sign is detected
     """
-    stop_sign_label = 7 # Use class car for test
+    stop_sign_label = 15 # Use class person for test
 
     if (stop_sign_label in labels):
         # Show stop sign symbol
