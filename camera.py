@@ -17,6 +17,8 @@ import sys
 import torch
 
 from ssd_pytorch.ssd import ssdModel as ssd
+from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
+from faster_rcnn.fasterrcnn import predict
 from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
@@ -38,6 +40,8 @@ def runProgram():
     # DETR requires pytorch version 1.5+ and torchvision 0.6+
     elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
         model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=True)
+    elif ( (len(sys.argv) == 2) and (model_type == "-fasterrcnn")):
+            predictor = frcnn()
     else:
         model_enabled = 0
     
@@ -86,10 +90,17 @@ def runProgram():
             frame = image   # Until the function above is implemented
             # output is a dict containing "pred_logits" of [batch_size x num_queries x (num_classes + 1)]
             # and "pred_boxes" of shape (center_x, center_y, height, width) normalized to be between [0, 1]
-
         elif (len(sys.argv) == 2 and model_enabled == 1):
             boxes, labels, probs = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, probs, boxes, labels)
+        #if (len(sys.argv) == 2 and model_enabled == 1):
+        #    boxes, labels, probs = predictor.predict(image, 10, 0.4)
+        #    frame = pascalBoxes(image, probs, boxes, labels)
+
+        ###### FASTER RCNN TEST
+        #pred = predict(predictor, image, 10, 1)
+        #labels = [1, 1]
+        #probs = [1,1]
         
         # Get time after detection
         stats_core[2] = time.time()
@@ -124,8 +135,10 @@ if __name__ == '__main__':
         model_type = "-ssdmlite"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-detr")):
         model_type = "-detr"
+    elif (len(sys.argv) == 2 and (sys.argv[1] == "-fasterrcnn")):
+        model_type = "-fasterrcnn"
     else:
-        print("Usage: no arg or -ssdm or -ssdmlite or -detr")
+        print("Usage: no arg or -ssdm or -ssdmlite or -fasterrcnn or -detr")
         exit()
         
     print("Starting camera ... \nPress q to exit ")
