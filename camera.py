@@ -4,6 +4,7 @@ Main code to use different models with a webcam.
 Currently supported models and arguments to call it:
 SSD with Mobilenet          | -ssdm
 SSD with Mobilenet Lite     | -ssdmlite
+DETR                        | -detr
 
 
 The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
@@ -13,6 +14,7 @@ import numpy as np
 import cv2 as cv
 import time
 import sys
+import torch
 
 from ssd_pytorch.ssd import ssdModel as ssd
 from visualizer.pascal import drawBoxes as pascalBoxes
@@ -33,6 +35,9 @@ def runProgram():
         net, predictor = ssd("-ssdm")
     elif ( (len(sys.argv) == 2) and (model_type == "-ssdmlite")):
         net, predictor = ssd("-ssdmlite")
+    # DETR requires pytorch version 1.5+ and torchvision 0.6+
+    elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
+        model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=True)
     else:
         model_enabled = 0
     
@@ -74,7 +79,15 @@ def runProgram():
             model_enabled = cv.getTrackbarPos(switch,'Live Detection')
         
         # Locate objects with model if selected
-        if (len(sys.argv) == 2 and model_enabled == 1):
+        if (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
+            t_image = torch.as_tensor(image, dtype=torch.float32).unsqueeze(0)
+            t_image = t_image.permute(0, 3, 1, 2)
+            output = model(t_image)
+            frame = image   # Until the function above is implemented
+            # output is a dict containing "pred_logits" of [batch_size x num_queries x (num_classes + 1)]
+            # and "pred_boxes" of shape (center_x, center_y, height, width) normalized to be between [0, 1]
+
+        elif (len(sys.argv) == 2 and model_enabled == 1):
             boxes, labels, probs = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, probs, boxes, labels)
         
@@ -109,8 +122,10 @@ if __name__ == '__main__':
         model_type = "-ssdm"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdmlite")):
         model_type = "-ssdmlite"
+    elif (len(sys.argv) == 2 and (sys.argv[1] == "-detr")):
+        model_type = "-detr"
     else:
-        print("Usage: no arg or -ssdm or -ssdmlite")
+        print("Usage: no arg or -ssdm or -ssdmlite or -detr")
         exit()
         
     print("Starting camera ... \nPress q to exit ")
