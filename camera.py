@@ -23,6 +23,28 @@ from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
 import visualizer.signs as signs
+import torchvision.transforms as T
+from visualizer.coco import draw_boxes as cocoBoxes
+
+transform = T.Compose([
+    T.ToPILImage(),
+    T.Resize(800),
+    T.ToTensor(),
+    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
+
+# for output bounding box post-processing
+def box_cxcywh_to_xyxy(x):
+    x_c, y_c, w, h = x.unbind(1)
+    b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
+         (x_c + 0.5 * w), (y_c + 0.5 * h)]
+    return torch.stack(b, dim=1)
+
+def rescale_bboxes(out_bbox, size):
+    img_w, img_h = size
+    b = box_cxcywh_to_xyxy(out_bbox)
+    b = b * torch.tensor([img_w, img_h, img_w, img_h], dtype=torch.float32)
+    return b
 
 
 # Required for the slider
@@ -40,6 +62,7 @@ def runProgram():
     # DETR requires pytorch version 1.5+ and torchvision 0.6+
     elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
         model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=True)
+        model.eval()
     elif ( (len(sys.argv) == 2) and (model_type == "-fasterrcnn")):
             predictor = frcnn()
     else:
@@ -84,10 +107,26 @@ def runProgram():
         
         # Locate objects with model if selected
         if (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
-            t_image = torch.as_tensor(image, dtype=torch.float32).unsqueeze(0)
-            t_image = t_image.permute(0, 3, 1, 2)
+            t_image = transform(image).unsqueeze(0)
             output = model(t_image)
-            frame = image   # Until the function above is implemented
+
+            # keep only predictions of 0.9+ confidence
+            probas = output['pred_logits'].softmax(-1)[0,:,:-1]
+            #keep = probas.max(-1).values >= 0.5
+
+            boxes = rescale_bboxes(output['pred_boxes'][0], (t_image.size()[3], t_image.size()[2])).detach()
+            #boxes[:, [2,3]] = boxes[:, [3,2]]
+            #probs = probas[keep]
+            
+            #labels = [CLASSES[x]  for x, i in zip(probas.max(-1).indices, keep) if (i == True) ]
+            labels = probas.max(-1).indices
+
+
+            predictions = { 'boxes' : boxes,
+                            'scores' : probas.max(-1).values,
+                            'labels' : labels}
+
+            frame = cocoBoxes(image, predictions)   # Until the function above is implemented
             # output is a dict containing "pred_logits" of [batch_size x num_queries x (num_classes + 1)]
             # and "pred_boxes" of shape (center_x, center_y, height, width) normalized to be between [0, 1]
         elif (len(sys.argv) == 2 and model_enabled == 1):
@@ -113,7 +152,8 @@ def runProgram():
 
         # Enable symbols
         if (model_enabled == 1):
-            frame = signs.showStopSign(frame, stop_sign, labels, probs)
+            #frame = signs.showStopSign(frame, stop_sign, labels, probs)
+            pass
 
         # Display the resulting frame
         cv.imshow('Live Detection', frame)

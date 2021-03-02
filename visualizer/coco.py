@@ -51,11 +51,12 @@ def draw_boxes(img, predictions, thresh=0.9):
 
     ### Make boxes
     scores = predictions['scores'].detach().numpy()
-    scores = scores[scores > thresh]
+    keep = scores > thresh
+    scores = scores[keep]
 
     # Boxes
-    boxes = list(predictions['boxes'].detach().numpy())
-    labels_id = list(predictions['labels'].detach().numpy())
+    boxes = predictions['boxes'].detach().numpy()[keep]
+    labels_id = predictions['labels'].detach().numpy()[keep]
 
 
     img_out = img
@@ -74,6 +75,7 @@ def draw_boxes(img, predictions, thresh=0.9):
         label = instance_labels[labels_id[obj]]
         print(label)
         print(scores[obj])
+        print("p1:" + str(x1) + "," + str(y1)+"," + str(x2)+ "," + str(y2))
         font = cv.FONT_HERSHEY_PLAIN
         img_out = cv.rectangle(img,(x1,y1),(x2,y2),colour[obj],2)
 
@@ -81,4 +83,5 @@ def draw_boxes(img, predictions, thresh=0.9):
         bb_text = label + " " + "{:.2f}".format(scores[obj])
         cv.putText(img_out, bb_text, (x1,int(y1-5)), font, 1.3, (0,0,0), 2 )
         
+    img_out = cv.cvtColor(img_out, cv.COLOR_RGB2BGR)    
     return img_out
