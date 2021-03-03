@@ -9,6 +9,7 @@ YOLO v?                     | -yolo         -> TODO
 DETR with Resnet50          | -detr         -> TODO
 Faster R-CNN with ?         | -fasterrcnn   -> TODO
 
+Videos are expected in the folder media/DrivingClips.
 
 The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
 """
@@ -89,8 +90,8 @@ def runProgram():
 
         # Locate objects with model if selected
         if (len(sys.argv) == 3 and model_enabled == 1):
-            boxes, labels, probs = predictor.predict(image, 10, 0.4)
-            frame = pascalBoxes(image, probs, boxes, labels)
+            boxes, labels, conf = predictor.predict(image, 10, 0.4)
+            frame = pascalBoxes(image, conf, boxes, labels)
             
         # Get time after detection
         stats_core[2] = time.time()
@@ -99,11 +100,11 @@ def runProgram():
         if (statsFlag == 1):
             frame = showCoreStats(frame, stats_core) 
         if (statsFlag == 1) and (model_enabled == 1):
-            frame = showModelStats(frame, labels)
+            frame = showModelStats(frame, labels, conf)
 
         # Enable symbols
         if (model_enabled == 1):
-            frame = signs.showStopSign(frame, stop_sign, labels, probs)
+            frame = signs.showStopSign(frame, stop_sign, labels, conf)
         
         # Display the resulting frame
         cv.imshow('Video Detection', frame)

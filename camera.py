@@ -91,8 +91,8 @@ def runProgram():
         
         # Locate objects with model if selected
         if (len(sys.argv) == 2 and model_enabled == 1):
-            boxes, labels, probs = predictor.predict(image, 10, 0.4)
-            frame = pascalBoxes(image, probs, boxes, labels)
+            boxes, labels, conf = predictor.predict(image, 10, 0.4)
+            frame = pascalBoxes(image, conf, boxes, labels)
 
         elif (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
             t_image = torch.as_tensor(image, dtype=torch.float32).unsqueeze(0)
@@ -106,7 +106,7 @@ def runProgram():
         ###### FASTER RCNN TEST
         #pred = predict(predictor, image, 10, 1)
         #labels = [1, 1]
-        #probs = [1,1]
+        #conf = [1,1]
         
         # Get time after detection
         stats_core[2] = time.time()
@@ -115,11 +115,11 @@ def runProgram():
         if (statsFlag == 1):
             frame = showCoreStats(frame, stats_core) 
         if (statsFlag == 1) and (model_enabled == 1):
-            frame = showModelStats(frame, labels)
+            frame = showModelStats(frame, labels, conf)
 
         # Enable symbols
         if (model_enabled == 1):
-            frame = signs.showStopSign(frame, stop_sign, labels, probs)
+            frame = signs.showStopSign(frame, stop_sign, labels, conf)
 
         # Display the resulting frame
         cv.imshow('Live Detection', frame)
