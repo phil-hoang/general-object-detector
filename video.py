@@ -37,11 +37,12 @@ def runProgram():
     
     # Prepare video input and output
     selected_video = sys.argv[2]
-    cap = cv.VideoCapture("dev/DrivingClips/" + selected_video + ".mp4")
+    cap = cv.VideoCapture("media/DrivingClips/" + selected_video + ".mp4")
     #out = cv.VideoWriter('dev/output.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), 12.0, (1280, 720))
+    
 
     if not cap.isOpened():
-        print("ERROR! Cannot open camera")
+        print("ERROR! Cannot read video")
         exit()
 
     # Create slider to turn stats and model on or off
