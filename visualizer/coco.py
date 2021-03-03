@@ -16,12 +16,12 @@ def draw_boxes(img, predictions, thresh=0.9):
     Args:
     img         -- Original image without bounding boxes
     predictions -- Dictionary with boxes, labels and scores. Not a list of dict! Sorted for each bounding box
-        boxes   -- Coordinates of the top left and bottom right of the bounding box ordered as [:, (x1, y1, x2, y2)]
-        labels  -- index labels for each bounding box [:, <label index>]
-        scores  -- Class confidence scores for each bounding box [:, <class scores>]. For COCO, expects 91 different classes.
+        boxes   -- List of coordinates of the top left and bottom right of the bounding box ordered as [(x1, y1, x2, y2)]
+        labels  -- List of index labels for each bounding box [<label indices>]
+        scores  -- List of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes.
     
     Returns:
-    img_out     -- imgage now with bounding boxes with labels and scores top left of the box
+    img_out     -- image now with bounding boxes with labels and scores top left of the box
     """
 
     # Label/class names in COCO
