@@ -19,32 +19,15 @@ import torch
 from ssd_pytorch.ssd import ssdModel as ssd
 from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
 from faster_rcnn.fasterrcnn import predict
+from detr.detr import detr_load as detr
+from detr.detr import detr_predict
 from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
 import visualizer.signs as signs
-import torchvision.transforms as T
 from visualizer.coco import draw_boxes as cocoBoxes
 
-transform = T.Compose([
-    T.ToPILImage(),
-    T.Resize(800),
-    T.ToTensor(),
-    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
 
-# for output bounding box post-processing
-def box_cxcywh_to_xyxy(x):
-    x_c, y_c, w, h = x.unbind(1)
-    b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
-         (x_c + 0.5 * w), (y_c + 0.5 * h)]
-    return torch.stack(b, dim=1)
-
-def rescale_bboxes(out_bbox, size):
-    img_w, img_h = size
-    b = box_cxcywh_to_xyxy(out_bbox)
-    b = b * torch.tensor([img_w, img_h, img_w, img_h], dtype=torch.float32)
-    return b
 
 
 # Required for the slider
@@ -61,8 +44,7 @@ def runProgram():
         net, predictor = ssd("-ssdmlite")
     # DETR requires pytorch version 1.5+ and torchvision 0.6+
     elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
-        model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=True)
-        model.eval()
+            predictor = detr()
     elif ( (len(sys.argv) == 2) and (model_type == "-fasterrcnn")):
             predictor = frcnn()
     else:
@@ -107,28 +89,10 @@ def runProgram():
         
         # Locate objects with model if selected
         if (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
-            t_image = transform(image).unsqueeze(0)
-            output = model(t_image)
 
-            # keep only predictions of 0.9+ confidence
-            probas = output['pred_logits'].softmax(-1)[0,:,:-1]
-            #keep = probas.max(-1).values >= 0.5
-
-            boxes = rescale_bboxes(output['pred_boxes'][0], (t_image.size()[3], t_image.size()[2])).detach()
-            #boxes[:, [2,3]] = boxes[:, [3,2]]
-            #probs = probas[keep]
+            predictions = detr_predict(predictor, image)
+            frame = cocoBoxes(image, predictions)
             
-            #labels = [CLASSES[x]  for x, i in zip(probas.max(-1).indices, keep) if (i == True) ]
-            labels = probas.max(-1).indices
-
-
-            predictions = { 'boxes' : boxes,
-                            'scores' : probas.max(-1).values,
-                            'labels' : labels}
-
-            frame = cocoBoxes(image, predictions)   # Until the function above is implemented
-            # output is a dict containing "pred_logits" of [batch_size x num_queries x (num_classes + 1)]
-            # and "pred_boxes" of shape (center_x, center_y, height, width) normalized to be between [0, 1]
         elif (len(sys.argv) == 2 and model_enabled == 1):
             boxes, labels, probs = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, probs, boxes, labels)
