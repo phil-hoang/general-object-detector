@@ -1,9 +1,18 @@
 """
-Code to run different models on an input video. Can write the results to a file if selected.
+Main code to use different models on a video input.
+
+Currently supported models and arguments to call it:
+SSD with Mobilenet          | -ssdm
+SSD with Mobilenet Lite     | -ssdmlite
+SSD with VGG-16             | -ssdvgg       -> TODO
+YOLO v?                     | -yolo         -> TODO
+DETR with Resnet50          | -detr         -> TODO
+Faster R-CNN with ?         | -fasterrcnn   -> TODO
 
 
-
+The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
 """
+
 import numpy as np
 import cv2 as cv
 import time
@@ -30,6 +39,8 @@ def runProgram():
         net, predictor = ssd("-ssdm")
     elif ( (len(sys.argv) == 3) and (model_type == "-ssdmlite")):
         net, predictor = ssd("-ssdmlite")
+    #elif ( (len(sys.argv) == 2) and (model_type == "-ssdvgg")):
+    #    net, predictor = ssd("-ssdvgg")
     elif ( (len(sys.argv) == 3) and (model_type == "-fasterrcnn")):
             predictor = frcnn()
     else:
@@ -46,11 +57,12 @@ def runProgram():
         exit()
 
     # Create slider to turn stats and model on or off
+    statsSliderLabel = 'Show stats'
+    modelSliderLabel = 'Model OFF / ON'
     cv.namedWindow('Video Detection')
-    switch = 'Model OFF / ON'
-    cv.createTrackbar('Show stats', 'Video Detection', 1, 1, nothing)
+    cv.createTrackbar(statsSliderLabel, 'Video Detection', 1, 1, nothing)
     if (len(sys.argv) == 3):
-        cv.createTrackbar(switch, 'Video Detection', 1, 1, nothing)
+        cv.createTrackbar(modelSliderLabel, 'Video Detection', 1, 1, nothing)
 
     # Load sign symbols
     stop_sign = signs.load()[0]
@@ -71,9 +83,9 @@ def runProgram():
         stats_core[0] = cap.get(cv.CAP_PROP_FPS)
 
         # Set slider to turn on or off stats and enable or disable a model, if a model is selected
-        statsFlag = cv.getTrackbarPos('Show stats','Video Detection')
+        statsFlag = cv.getTrackbarPos(statsSliderLabel,'Video Detection')
         if (len(sys.argv) == 3):
-            model_enabled = cv.getTrackbarPos(switch,'Video Detection')
+            model_enabled = cv.getTrackbarPos(modelSliderLabel,'Video Detection')
 
         # Locate objects with model if selected
         if (len(sys.argv) == 3 and model_enabled == 1):
