@@ -42,6 +42,8 @@ def runProgram():
         net, predictor = ssd("-ssdm")
     elif ( (len(sys.argv) == 2) and (model_type == "-ssdmlite")):
         net, predictor = ssd("-ssdmlite")
+    elif ( (len(sys.argv) == 2) and (model_type == "-ssdvgg")):
+        net, predictor = ssd("-ssdvgg")
     # DETR requires pytorch version 1.5+ and torchvision 0.6+
     elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
             predictor = detr()
@@ -137,12 +139,14 @@ if __name__ == '__main__':
         model_type = "-ssdm"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdmlite")):
         model_type = "-ssdmlite"
+    elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdvgg")):
+        model_type = "-ssdvgg"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-detr")):
         model_type = "-detr"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-fasterrcnn")):
         model_type = "-fasterrcnn"
     else:
-        print("Usage: no arg or -ssdm or -ssdmlite or -fasterrcnn or -detr")
+        print("Usage: no arg or -ssdm or -ssdmlite or -ssdvgg or -fasterrcnn or -detr")
         exit()
         
     print("Starting camera ... \nPress q to exit ")

@@ -131,4 +131,5 @@ dmypy.json
 
 # Add folder
 dev/
-
+*.mp4
+*.pth

@@ -1,6 +1,6 @@
 import numpy as np
 
-from vision.utils.box_utils import SSDSpec, SSDBoxSizes, generate_ssd_priors
+from ssd_pytorch.vision.utils.box_utils import SSDSpec, SSDBoxSizes, generate_ssd_priors
 
 
 image_size = 300
