@@ -23,12 +23,14 @@ def detr_predict(model, image):
     Function used preprocess the image, feed it into the detr model, and prepare the output draw bounding boxes
 
     Inputs: model - the detr model from detr_load()
-            image - Array the original image from openCV [height, width, channels]
+            image - Array the original image from openCV [width, height, channels]
 
     Outputs: predictions - Dictionary with boxes, labels and scores. Not a list of dict! Sorted for each bounding box
                 boxes   - List of coordinates of the top left and bottom right of the bounding box ordered as [(x1, y1, x2, y2)]
                 labels  - List of index labels for each bounding box [<label indices>]
                 scores  - List of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes.
+    
+    Related functions: detr_load, draw_boxes in coco.py
     """
     def box_cxcywh_to_xyxy(x):
         # Converts bounding boxes to (x1, y1, x2, y2) coordinates of top left and bottom right corners
