@@ -23,7 +23,6 @@ To use the detector with for example SSD Mobilenet on file video.mp4, type:
 ```
 run.py -ssdm video
 ```
-
 To use it with the webcam just ommit the filename:
 ```
 run.py -ssdm
@@ -34,3 +33,8 @@ run.py
 ```
 without any arguments just opens the webcam and displays its output.
 
+To write information about the model like the minimum detection confidence or inference time to a file, use the optional argument `-l`. Example:
+
+```
+run.py -ssdm video -l
+```
