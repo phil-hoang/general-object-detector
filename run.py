@@ -33,6 +33,7 @@ import cv2 as cv
 import time
 import sys
 import torch
+#import pickle
 
 from ssd_pytorch.ssd import ssdModel as ssd
 from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
@@ -41,6 +42,7 @@ from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
 import visualizer.signs as signs
+import tools.logs as logger
 
 
 # Required for the slider
@@ -48,7 +50,7 @@ def nothing(x):
     pass
 
 #%%
-def runProgram(model_type, video_file):
+def runProgram(model_type, video_file, logs_enabled):
     #%% Model selection if chosen in command line
     if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
         net, predictor = ssd(model_type)
@@ -92,6 +94,10 @@ def runProgram(model_type, video_file):
     # Initialize list for model unrelated core stats. [fps, time.start, time.end]
     stats_core = [None, None, None]
 
+    # Initialize logs
+    if logs_enabled == True:
+        logs = logger.initialize()
+
     #%% Loop through each frame
     while True:
         # Get time before detection
@@ -128,11 +134,19 @@ def runProgram(model_type, video_file):
         if (model_enabled == 1):
             frame = signs.showStopSign(frame, stop_sign, labels, conf)
         
+        # Write logs if enables
+        if logs_enabled is True:
+            logs = logger.writeLog(logs, stats_core[1], stats_core[2], labels, conf)
+
         # Display the resulting frame
         cv.imshow(windowname, frame)
         #out.write(frame)
         if cv.waitKey(1) == ord('q'):
             break
+    
+    # Writing logs to file
+    if logs_enabled is True:
+        logger.saveLogs(logs)
 
     # When everything is done, release the capture
     cap.release()
@@ -144,24 +158,31 @@ if __name__ == '__main__':
     # Allow no model or selected model
     supported_models = ["-ssdm", "-ssdmlite", "-ssdvgg", "-detr", "-fasterrcnn"]
     
+    # Initialize log variable
+    logs_enabled = False
+
     # Camera mode without a model
-    if (len(sys.argv) == 1 ):
+    if (len(sys.argv) == 1):
         model_type = None
         video_file = None
     # Camera mode with a model
-    elif (len(sys.argv) == 2 and (sys.argv[1] in supported_models)):
+    elif ((len(sys.argv) == 2 or len(sys.argv) == 3 ) and (sys.argv[1] in supported_models)):
         model_type = sys.argv[1]
         video_file = None
+        if (len(sys.argv) == 3 and sys.argv[2] == "-l"):
+            logs_enabled = True
     # Camera mode with a video file
-    elif (len(sys.argv) == 3 and (sys.argv[1] in supported_models)):
+    elif ((len(sys.argv) == 3 or len(sys.argv) == 4) and (sys.argv[1] in supported_models)):
         model_type = sys.argv[1]
         video_file = sys.argv[2]
+        if (len(sys.argv) == 4 and sys.argv[3] == "-l"):
+            logs_enabled = True
     else:
-        print("Usage: <model> <video_filename>\nAvailable models are: -ssdm, -ssdmlite, -ssdvgg, -fasterrcnn, -detr\nTo just run the webcam provide no args.")
+        print("Usage: <model> <video_filename> [opt: <-l>]\nAvailable models are: -ssdm, -ssdmlite, -ssdvgg, -fasterrcnn, -detr\nTo just run the webcam provide no args.")
         exit()
 
     if (len(sys.argv) <= 2):
         print("Starting camera ... \nPress q to exit ")
     else:
         print("Starting video ... \nPress q to exit ")
-    runProgram(model_type, video_file)
+    runProgram(model_type, video_file, logs_enabled)

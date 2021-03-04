@@ -29,6 +29,8 @@ def showStats(image, stats, conf):
     numBikes = np.count_nonzero(stats == 2)
     numPed = np.count_nonzero(stats == 15)
     numSign = 0 # Not available in PASCAL!
+    numOther = 0 # Other classes
+
 
     if (len(conf.numpy()) > 0):
         minConf = '{:.2f}'.format(min(conf.numpy()))
@@ -53,7 +55,10 @@ def showStats(image, stats, conf):
     text = "signs: " + str(numSign)
     cv.putText(image, text, (5, int(image.shape[0]/2)+120), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
 
-    text = "Min confidence: " + minConf
+    text = "other: " + str(numOther)
     cv.putText(image, text, (5, int(image.shape[0]/2)+140), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
+
+    text = "Min confidence: " + minConf
+    cv.putText(image, text, (5, int(image.shape[0]/2)+150), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
 
     return image
