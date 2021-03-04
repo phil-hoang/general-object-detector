@@ -9,6 +9,13 @@ We currently support the models:
 
 The SSD model is taken from here: https://github.com/qfgaohao/pytorch-ssd
 
+## Dependencies
+* Python >= 3.79
+* OpenCV2
+* PyTorch >= 1.6.0
+* Torchvision >= 0.7.0
+
+
 ## Usage
 
 To use the detector with for example SSD Mobilenet on file video.mp4, type:
