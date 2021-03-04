@@ -9,11 +9,14 @@ We currently support the models:
 
 The SSD model is taken from here: https://github.com/qfgaohao/pytorch-ssd
 
-## Dependencies
+## Dependencies and setup
 * Python >= 3.79
 * OpenCV2
 * PyTorch >= 1.6.0
 * Torchvision >= 0.7.0
+
+To use the video function place `.mp4` videos into the folder `media/DrivingClips`.
+
 
 
 ## Usage
