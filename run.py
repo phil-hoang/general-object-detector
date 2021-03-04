@@ -1,5 +1,19 @@
 """
-Main code to use different models with a webcam.
+Main code to use different models with a webcam or a video file.
+To use the detector with for example SSD Mobilenet on file video.mp4, type:
+
+    run.py -ssdm video
+
+To use it with the webcam just ommit the filename:
+
+    run.py -ssdm
+
+Running the command
+
+    run.py
+
+without any arguments just opens the webcam and displays its output.
+
 
 Currently supported models and arguments to call it:
 SSD with Mobilenet          | -ssdm
@@ -8,6 +22,7 @@ SSD with VGG-16             | -ssdvgg       -> TODO
 YOLO v?                     | -yolo         -> TODO
 DETR with Resnet50          | -detr         -> TODO
 Faster R-CNN with ?         | -fasterrcnn   -> TODO
+
 
 
 The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
@@ -33,37 +48,44 @@ def nothing(x):
     pass
 
 #%%
-def runProgram():
-    
+def runProgram(model_type, video_file):
     #%% Model selection if chosen in command line
-    if ( (len(sys.argv) == 2) and (model_type == "-ssdm")):
-        net, predictor = ssd("-ssdm")
-    elif ( (len(sys.argv) == 2) and (model_type == "-ssdmlite")):
-        net, predictor = ssd("-ssdmlite")
-    #elif ( (len(sys.argv) == 2) and (model_type == "-ssdvgg")):
-    #    net, predictor = ssd("-ssdvgg")
-    # DETR requires pytorch version 1.5+ and torchvision 0.6+
-    elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
-        model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=True)
-    elif ( (len(sys.argv) == 2) and (model_type == "-fasterrcnn")):
-            predictor = frcnn()
+    if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
+        net, predictor = ssd(model_type)
+    elif (model_type == "-fasterrcnn"):
+        predictor = frcnn()
+    elif (model_type == "-detr"):
+        print("DETR")
     else:
         model_enabled = 0
-    
-    # Prepare camera
-    cap = cv.VideoCapture(0)
-    if not cap.isOpened():
-        print("ERROR! Cannot open camera")
-        exit()
 
+    # Prepare input and output
+    if (video_file == None):
+        # Camera mode
+        cap = cv.VideoCapture(0)
+        if not cap.isOpened():
+            print("ERROR! Cannot open camera")
+            exit()
+    else:
+        # Video mode
+        cap = cv.VideoCapture("media/DrivingClips/" + video_file + ".mp4")
+        #out = cv.VideoWriter('dev/output.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), 12.0, (1280, 720))
+        if not cap.isOpened():
+            print("ERROR! Cannot read video")
+            exit()
+    
     # Create slider to turn stats and model on or off
     statsSliderLabel = 'Show stats'
     modelSliderLabel = 'Model OFF / ON'
-    cv.namedWindow('Live Detection')
-    cv.createTrackbar(statsSliderLabel, 'Live Detection', 0, 1, nothing)
-    if (len(sys.argv) == 2):
-        cv.createTrackbar(modelSliderLabel, 'Live Detection', 0, 1, nothing)
-
+    if (len(sys.argv) <= 2):
+        windowname = 'Live Detection'
+    else:
+        windowname = 'Video Detection'
+    cv.namedWindow(windowname)
+    cv.createTrackbar(statsSliderLabel, windowname, 1, 1, nothing)
+    if (len(sys.argv) >= 2):
+        cv.createTrackbar(modelSliderLabel, windowname, 1, 1, nothing)
+    
     # Load sign symbols
     stop_sign = signs.load()[0]
 
@@ -74,7 +96,7 @@ def runProgram():
     while True:
         # Get time before detection
         stats_core[1] = time.time()
-        
+
         # Get a frame, convert to RGB and get frames per second fps
         ret, frame = cap.read()
         if not ret:
@@ -84,30 +106,16 @@ def runProgram():
         stats_core[0] = cap.get(cv.CAP_PROP_FPS)
 
         # Set slider to turn on or off stats and enable or disable a model, if a model is selected
-        statsFlag = cv.getTrackbarPos(statsSliderLabel,'Live Detection')
-        if (len(sys.argv) == 2):
-            model_enabled = cv.getTrackbarPos(modelSliderLabel,'Live Detection')
-        
+        statsFlag = cv.getTrackbarPos(statsSliderLabel, windowname)
+        if (len(sys.argv) >= 2):
+            model_enabled = cv.getTrackbarPos(modelSliderLabel, windowname)
+
         # Locate objects with model if selected
-        if (len(sys.argv) == 2 and model_enabled == 1):
+        if (len(sys.argv) >= 2 and model_enabled == 1):
             boxes, labels, conf = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, conf, boxes, labels)
 
-        elif (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
-            t_image = torch.as_tensor(image, dtype=torch.float32).unsqueeze(0)
-            t_image = t_image.permute(0, 3, 1, 2)
-            output = model(t_image)
-            frame = image   # Until the function above is implemented
-            # output is a dict containing "pred_logits" of [batch_size x num_queries x (num_classes + 1)]
-            # and "pred_boxes" of shape (center_x, center_y, height, width) normalized to be between [0, 1]
-
-
-        ###### FASTER RCNN TEST
-        #pred = predict(predictor, image, 10, 1)
-        #labels = [1, 1]
-        #conf = [1,1]
-        
-        # Get time after detection
+         # Get time after detection
         stats_core[2] = time.time()
 
         #  Display stats if selected with slider
@@ -119,34 +127,41 @@ def runProgram():
         # Enable symbols
         if (model_enabled == 1):
             frame = signs.showStopSign(frame, stop_sign, labels, conf)
-
+        
         # Display the resulting frame
-        cv.imshow('Live Detection', frame)
+        cv.imshow(windowname, frame)
+        #out.write(frame)
         if cv.waitKey(1) == ord('q'):
             break
 
     # When everything is done, release the capture
     cap.release()
+    #out.release()
     cv.destroyAllWindows()
 
 
 if __name__ == '__main__':
     # Allow no model or selected model
+    supported_models = ["-ssdm", "-ssdmlite", "-ssdvgg", "-detr", "-fasterrcnn"]
+    
+    # Camera mode without a model
     if (len(sys.argv) == 1 ):
         model_type = None
-    elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdm")):
-        model_type = "-ssdm"
-    elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdmlite")):
-        model_type = "-ssdmlite"
-    #elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdvgg")):
-    #    model_type = "-ssdvgg"
-    elif (len(sys.argv) == 2 and (sys.argv[1] == "-detr")):
-        model_type = "-detr"
-    elif (len(sys.argv) == 2 and (sys.argv[1] == "-fasterrcnn")):
-        model_type = "-fasterrcnn"
+        video_file = None
+    # Camera mode with a model
+    elif (len(sys.argv) == 2 and (sys.argv[1] in supported_models)):
+        model_type = sys.argv[1]
+        video_file = None
+    # Camera mode with a video file
+    elif (len(sys.argv) == 3 and (sys.argv[1] in supported_models)):
+        model_type = sys.argv[1]
+        video_file = sys.argv[2]
     else:
-        print("Usage: no arg or -ssdm or -ssdmlite or -ssdvgg or -fasterrcnn or -detr")
+        print("Usage: <model> <video_filename>\nAvailable models are: -ssdm, -ssdmlite, -ssdvgg, -fasterrcnn, -detr\nTo just run the webcam provide no args.")
         exit()
-        
-    print("Starting camera ... \nPress q to exit ")
-    runProgram()
+
+    if (len(sys.argv) <= 2):
+        print("Starting camera ... \nPress q to exit ")
+    else:
+        print("Starting video ... \nPress q to exit ")
+    runProgram(model_type, video_file)
