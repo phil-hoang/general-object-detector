@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 
-def showStats(image, stats):
+def showStats(image, stats, conf):
     """
     Displays a count of selected objects in the image.
     Recognized objects are:
@@ -15,7 +15,8 @@ def showStats(image, stats):
 
     Args:
     image - Opencv image object in RGB
-    stats - Torch tensor with label indices of varying lenght.
+    stats - Torch tensor with label indices of varying length.
+    conf  - Torch tensor with confidences for each class.
 
     Returns:
     Image - Opencv image object in RGB with stats
@@ -28,6 +29,11 @@ def showStats(image, stats):
     numBikes = np.count_nonzero(stats == 2)
     numPed = np.count_nonzero(stats == 15)
     numSign = 0 # Not available in PASCAL!
+
+    if (len(conf.numpy()) > 0):
+        minConf = '{:.2f}'.format(min(conf.numpy()))
+    else:
+        minConf = "NA"
 
     text = "cars: " + str(numCars)
     cv.putText(image, text, (5, int(image.shape[0]/2)+20), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
@@ -46,5 +52,8 @@ def showStats(image, stats):
 
     text = "signs: " + str(numSign)
     cv.putText(image, text, (5, int(image.shape[0]/2)+120), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
+
+    text = "Min confidence: " + minConf
+    cv.putText(image, text, (5, int(image.shape[0]/2)+140), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
 
     return image

@@ -4,7 +4,10 @@ Main code to use different models with a webcam.
 Currently supported models and arguments to call it:
 SSD with Mobilenet          | -ssdm
 SSD with Mobilenet Lite     | -ssdmlite
-DETR                        | -detr
+SSD with VGG-16             | -ssdvgg       -> TODO
+YOLO v?                     | -yolo         -> TODO
+DETR with Resnet50          | -detr         -> TODO
+Faster R-CNN with ?         | -fasterrcnn   -> TODO
 
 
 The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
@@ -42,8 +45,8 @@ def runProgram():
         net, predictor = ssd("-ssdm")
     elif ( (len(sys.argv) == 2) and (model_type == "-ssdmlite")):
         net, predictor = ssd("-ssdmlite")
-    elif ( (len(sys.argv) == 2) and (model_type == "-ssdvgg")):
-        net, predictor = ssd("-ssdvgg")
+    #elif ( (len(sys.argv) == 2) and (model_type == "-ssdvgg")):
+    #    net, predictor = ssd("-ssdvgg")
     # DETR requires pytorch version 1.5+ and torchvision 0.6+
     elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
             predictor = detr()
@@ -59,11 +62,12 @@ def runProgram():
         exit()
 
     # Create slider to turn stats and model on or off
+    statsSliderLabel = 'Show stats'
+    modelSliderLabel = 'Model OFF / ON'
     cv.namedWindow('Live Detection')
-    switch = 'Model OFF / ON'
-    cv.createTrackbar('Show stats', 'Live Detection', 0, 1, nothing)
+    cv.createTrackbar(statsSliderLabel, 'Live Detection', 0, 1, nothing)
     if (len(sys.argv) == 2):
-        cv.createTrackbar(switch, 'Live Detection', 0, 1, nothing)
+        cv.createTrackbar(modelSliderLabel, 'Live Detection', 0, 1, nothing)
 
     # Load sign symbols
     stop_sign = signs.load()[0]
@@ -85,9 +89,9 @@ def runProgram():
         stats_core[0] = cap.get(cv.CAP_PROP_FPS)
 
         # Set slider to turn on or off stats and enable or disable a model, if a model is selected
-        statsFlag = cv.getTrackbarPos('Show stats','Live Detection')
+        statsFlag = cv.getTrackbarPos(statsSliderLabel,'Live Detection')
         if (len(sys.argv) == 2):
-            model_enabled = cv.getTrackbarPos(switch,'Live Detection')
+            model_enabled = cv.getTrackbarPos(modelSliderLabel,'Live Detection')
         
         # Locate objects with model if selected
         if (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
@@ -105,7 +109,7 @@ def runProgram():
         ###### FASTER RCNN TEST
         #pred = predict(predictor, image, 10, 1)
         #labels = [1, 1]
-        #probs = [1,1]
+        #conf = [1,1]
         
         # Get time after detection
         stats_core[2] = time.time()
@@ -114,12 +118,11 @@ def runProgram():
         if (statsFlag == 1):
             frame = showCoreStats(frame, stats_core) 
         if (statsFlag == 1) and (model_enabled == 1):
-            frame = showModelStats(frame, labels)
+            frame = showModelStats(frame, labels, conf)
 
         # Enable symbols
         if (model_enabled == 1):
-            #frame = signs.showStopSign(frame, stop_sign, labels, probs)
-            pass
+            frame = signs.showStopSign(frame, stop_sign, labels, conf)
 
         # Display the resulting frame
         cv.imshow('Live Detection', frame)
@@ -139,8 +142,8 @@ if __name__ == '__main__':
         model_type = "-ssdm"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdmlite")):
         model_type = "-ssdmlite"
-    elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdvgg")):
-        model_type = "-ssdvgg"
+    #elif (len(sys.argv) == 2 and (sys.argv[1] == "-ssdvgg")):
+    #    model_type = "-ssdvgg"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-detr")):
         model_type = "-detr"
     elif (len(sys.argv) == 2 and (sys.argv[1] == "-fasterrcnn")):
