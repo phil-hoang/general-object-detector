@@ -33,7 +33,6 @@ import cv2 as cv
 import time
 import sys
 import torch
-#import pickle
 
 from ssd_pytorch.ssd import ssdModel as ssd
 from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
@@ -42,7 +41,7 @@ from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
 import visualizer.signs as signs
-import tools.logs as logger
+import tools.logger as logger
 
 
 # Required for the slider
@@ -146,7 +145,7 @@ def runProgram(model_type, video_file, logs_enabled):
     
     # Writing logs to file
     if logs_enabled is True:
-        logger.saveLogs(logs)
+        logger.saveLogs(logs, video_file)
 
     # When everything is done, release the capture
     cap.release()
@@ -171,7 +170,7 @@ if __name__ == '__main__':
         video_file = None
         if (len(sys.argv) == 3 and sys.argv[2] == "-l"):
             logs_enabled = True
-    # Camera mode with a video file
+    # Video file mode with a model
     elif ((len(sys.argv) == 3 or len(sys.argv) == 4) and (sys.argv[1] in supported_models)):
         model_type = sys.argv[1]
         video_file = sys.argv[2]
