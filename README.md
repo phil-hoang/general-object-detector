@@ -7,7 +7,7 @@ We currently support the models:
 * [Detr](https://arxiv.org/abs/2005.12872)
 * [Faster R-CNN](https://arxiv.org/abs/1506.01497)
 
-The SSD model is taken from here: https://github.com/qfgaohao/pytorch-ssd
+The SSD model is taken from [here](https://github.com/qfgaohao/pytorch-ssd).
 
 ## Dependencies and setup
 * Python >= 3.79
@@ -17,16 +17,12 @@ The SSD model is taken from here: https://github.com/qfgaohao/pytorch-ssd
 
 To use the video function place `.mp4` videos into the folder `media/DrivingClips`.
 
-
-
 ## Usage
-
 To use the detector with for example SSD Mobilenet on file video.mp4, type:
 
 ```
 run.py -ssdm video
 ```
-
 To use it with the webcam just ommit the filename:
 ```
 run.py -ssdm
@@ -37,3 +33,8 @@ run.py
 ```
 without any arguments just opens the webcam and displays its output.
 
+To write information about the model like the minimum detection confidence or inference time to a file, use the optional argument `-l`. Example:
+
+```
+run.py -ssdm video -l
+```
