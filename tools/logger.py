@@ -45,28 +45,32 @@ def writeLog(logs, time_begin, time_end, labels, conf):
     return logs
 
 
-def saveLogs(logs, name_in):
+def saveLogs(logs, name_in, model_type):
     """
     Saves logs to disk.
     Default path is: dev/logs
 
     Args:
-    logs    -- Dictionary with log data
-    name_in -- Name of the input video without file extension. Is None in camera mode.
-
+    logs        -- Dictionary with log data
+    name_in     -- String of the input video without file extension. Is None in camera mode.
+    model_type  -- String of the model name which was used with the input
     """
 
     if name_in is None:
         name_in = "camera"
 
+    name_in = name_in + "_"+ model_type[1:]
+
     # Set path out
     path_out = "dev/logs"
 
-    # Make new filename index
+    # Make new filename index for file with the same name
     # Get filenames in folder
-    # TODO: Add check if name is same. Add running index for same filenames only.
     try:
-        existing_files = [f for f in listdir(path_out) if isfile(join(path_out, f))]
+        # Find all files in folder
+        all_files = [f for f in listdir(path_out) if isfile(join(path_out, f))]
+        # Find files with the same name as name_in
+        existing_files = [f for f in all_files if f[:-8] == name_in]
     except FileNotFoundError:
         print("Folder for logs not found at \"" + path_out +  "\".\nCould not save logs!")
         exit()
@@ -78,6 +82,7 @@ def saveLogs(logs, name_in):
         res = re.findall("[0-9]+", f.split('.')[0][-3:])
         if len(res) == 1:
             existing_indices.append(int(res[0]))
+
     # New filename index is greatest existing one plus one
     if len(existing_indices) > 0:
         index_out = max(existing_indices) + 1

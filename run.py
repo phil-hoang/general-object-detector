@@ -145,7 +145,7 @@ def runProgram(model_type, video_file, logs_enabled):
     
     # Writing logs to file
     if logs_enabled is True:
-        logger.saveLogs(logs, video_file)
+        logger.saveLogs(logs, video_file, model_type)
 
     # When everything is done, release the capture
     cap.release()
@@ -164,18 +164,25 @@ if __name__ == '__main__':
     if (len(sys.argv) == 1):
         model_type = None
         video_file = None
+
     # Camera mode with a model
-    elif ((len(sys.argv) == 2 or len(sys.argv) == 3 ) and (sys.argv[1] in supported_models)):
+    elif (len(sys.argv) == 2 and (sys.argv[1] in supported_models)):
         model_type = sys.argv[1]
         video_file = None
-        if (len(sys.argv) == 3 and sys.argv[2] == "-l"):
+    elif (len(sys.argv) == 3 and (sys.argv[1] in supported_models) and (sys.argv[2] == "-l")):
+            model_type = sys.argv[1]
+            video_file = None
             logs_enabled = True
+
     # Video file mode with a model
-    elif ((len(sys.argv) == 3 or len(sys.argv) == 4) and (sys.argv[1] in supported_models)):
+    elif (len(sys.argv) == 3 and (sys.argv[1] in supported_models)):
         model_type = sys.argv[1]
         video_file = sys.argv[2]
-        if (len(sys.argv) == 4 and sys.argv[3] == "-l"):
+    elif (len(sys.argv) == 4 and (sys.argv[1] in supported_models) and (sys.argv[3] == "-l")):
+            model_type = sys.argv[1]
+            video_file = sys.argv[2]
             logs_enabled = True
+
     else:
         print("Usage: <model> <video_filename> [opt: <-l>]\nAvailable models are: -ssdm, -ssdmlite, -ssdvgg, -fasterrcnn, -detr\nTo just run the webcam provide no args.")
         exit()
