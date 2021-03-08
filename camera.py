@@ -22,10 +22,15 @@ import torch
 from ssd_pytorch.ssd import ssdModel as ssd
 from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
 from faster_rcnn.fasterrcnn import predict
+from detr.detr import detr_load as detr
+from detr.detr import detr_predict
 from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
 import visualizer.signs as signs
+from visualizer.coco import draw_boxes as cocoBoxes
+
+
 
 
 # Required for the slider
@@ -44,7 +49,7 @@ def runProgram():
     #    net, predictor = ssd("-ssdvgg")
     # DETR requires pytorch version 1.5+ and torchvision 0.6+
     elif ( (len(sys.argv)==2)) and (model_type == "-detr"):
-        model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=True)
+            predictor = detr()
     elif ( (len(sys.argv) == 2) and (model_type == "-fasterrcnn")):
             predictor = frcnn()
     else:
@@ -89,18 +94,17 @@ def runProgram():
             model_enabled = cv.getTrackbarPos(modelSliderLabel,'Live Detection')
         
         # Locate objects with model if selected
-        if (len(sys.argv) == 2 and model_enabled == 1):
-            boxes, labels, conf = predictor.predict(image, 10, 0.4)
-            frame = pascalBoxes(image, conf, boxes, labels)
+        if (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
 
-        elif (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
-            t_image = torch.as_tensor(image, dtype=torch.float32).unsqueeze(0)
-            t_image = t_image.permute(0, 3, 1, 2)
-            output = model(t_image)
-            frame = image   # Until the function above is implemented
-            # output is a dict containing "pred_logits" of [batch_size x num_queries x (num_classes + 1)]
-            # and "pred_boxes" of shape (center_x, center_y, height, width) normalized to be between [0, 1]
-
+            predictions = detr_predict(predictor, image)
+            frame = cocoBoxes(image, predictions)
+            
+        elif (len(sys.argv) == 2 and model_enabled == 1):
+            boxes, labels, probs = predictor.predict(image, 10, 0.4)
+            frame = pascalBoxes(image, probs, boxes, labels)
+        #if (len(sys.argv) == 2 and model_enabled == 1):
+        #    boxes, labels, probs = predictor.predict(image, 10, 0.4)
+        #    frame = pascalBoxes(image, probs, boxes, labels)
 
         ###### FASTER RCNN TEST
         #pred = predict(predictor, image, 10, 1)
