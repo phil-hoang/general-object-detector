@@ -95,7 +95,6 @@ def runProgram():
         
         # Locate objects with model if selected
         if (len(sys.argv) == 2 and model_enabled == 1 and model_type == "-detr"):
-
             predictions = detr_predict(predictor, image)
             frame = cocoBoxes(image, predictions)
             

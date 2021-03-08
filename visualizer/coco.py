@@ -1,24 +1,16 @@
 import numpy as np
 import cv2 as cv
 
-#import torch
-#import torchvision
-#from torchvision.transforms import ToTensor
 
-
-#%%
-
-
-def draw_boxes(img, predictions, thresh=0.9):
+def draw_boxes(image, boxes, labels, conf, thresh=0.9):
     """
-    Per frame
+    Draws boxes per frame for COCO data.
 
     Args:
-    img         -- Original image without bounding boxes
-    predictions -- Dictionary with boxes, labels and scores. Not a list of dict! Sorted for each bounding box
-        boxes   -- List of coordinates of the top left and bottom right of the bounding box ordered as [(x1, y1, x2, y2)]
-        labels  -- List of index labels for each bounding box [<label indices>]
-        scores  -- List of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes.
+    imgage      -- Original image without bounding boxes
+    boxes       -- List of coordinates of the top left and bottom right of the bounding box ordered as [(x1, y1, x2, y2)]
+    labels      -- List of index labels for each bounding box [<label indices>]
+    scores      -- List of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes.
     
     Returns:
     img_out     -- image now with bounding boxes with labels and scores top left of the box
@@ -40,53 +32,35 @@ def draw_boxes(img, predictions, thresh=0.9):
     'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
     ]
 
+
+    # Class label indices
+    labelsMotor = [6, 3, 4, 8]
+    labelsPerson = [1, 2]
+    labelsSigns = [10, 13]
+
     # Colours used for the bounding boxes
-    colour = [(220,20,60), (0,255,0), (0,0,238), (255,215,0), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)
-                , (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33), (238,118,33)]
+    colourMotor = (255, 0, 0)
+    colourPerson = (0, 0, 255)
+    colourSigns = (0, 255, 0)
+    colourOther = (255, 165, 0)
 
-    ### Threshold scores
-    scores = predictions['scores'].detach().numpy()
-    keep = scores > thresh
-
-    # Filter out scores, boxes, and labels using threshold
-    scores = scores[keep]
-    boxes = predictions['boxes'].detach().numpy()[keep]
-    labels_id = predictions['labels'].detach().numpy()[keep]
-
-
-    img_out = img
-
+    # TODO: rename
+    labels_id = labels
     # Iterate through each instance
-    for i in range(len(scores)):
+    for i in range(len(conf)):
+         # Filter for classes
+        if (labels_id[i] in labelsMotor):
+            box = boxes[i, :]
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourPerson, 2)
+        elif (labels_id[i] in labelsPerson):
+            box = boxes[i, :]
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourMotor, 2)
+        elif (labels_id[i] in labelsSigns):
+            box = boxes[i, :]
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourSigns, 2)
+        else:
+            box = boxes[i, :]
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourOther, 2)
 
-        box = boxes[i]
-
-        # Extract coordinates for bounding box
-        x1 = box[0]
-        x2 = box[2]
-        y1 = box[1]
-        y2 = box[3]
-
-        # Extract labels and scores to label each bounding box
-        label = instance_labels[labels_id[i]]
-        print(label)
-        print(scores[i])
-        font = cv.FONT_HERSHEY_PLAIN
-
-        # Draw bounding box
-        img_out = cv.rectangle(img,(x1,y1),(x2,y2),colour[i],2)
-
-        # Add label to bounding box
-        bb_text = label + " " + "{:.2f}".format(scores[i])
-        cv.putText(img_out, bb_text, (x1,int(y1-5)), font, 1.3, (0,0,0), 2 )
-        
-    img_out = cv.cvtColor(img_out, cv.COLOR_RGB2BGR)    
-    return img_out
+    image = cv.cvtColor(image, cv.COLOR_RGB2BGR)   
+    return image

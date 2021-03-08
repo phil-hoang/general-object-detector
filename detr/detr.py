@@ -18,22 +18,26 @@ def detr_load():
 
     return model
 
-def detr_predict(model, image):
+def detr_predict(model, image, thresh=0.9):
     """
-    Function used preprocess the image, feed it into the detr model, and prepare the output draw bounding boxes
-
-    Inputs: model - the detr model from detr_load()
-            image - Array the original image from openCV [width, height, channels]
-
-    Outputs: predictions - Dictionary with boxes, labels and scores. Not a list of dict! Sorted for each bounding box
-                boxes   - List of coordinates of the top left and bottom right of the bounding box ordered as [(x1, y1, x2, y2)]
-                labels  - List of index labels for each bounding box [<label indices>]
-                scores  - List of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes.
-    
+    Function used to preprocess the image, feed it into the detr model, and prepare the output draw bounding boxes.
+    Outputs are thresholded.
     Related functions: detr_load, draw_boxes in coco.py
+
+    Args: 
+    model       -- the detr model from detr_load()
+    image       -- Array the original image from openCV [width, height, channels]
+
+    Returns: 
+    boxes       -- Torch tensor of coordinates of the top left and bottom right of the bounding box ordered as [(x1, y1, x2, y2)]
+    labels      -- Torch tensor of index labels for each bounding box [<label indices>]
+    scores      -- Torch tensor of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes 
     """
+
     def box_cxcywh_to_xyxy(x):
         # Converts bounding boxes to (x1, y1, x2, y2) coordinates of top left and bottom right corners
+
+        # (center_x, center_y, h, w)
         x_c, y_c, w, h = x.unbind(1)
         b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
             (x_c + 0.5 * w), (y_c + 0.5 * h)]
@@ -63,12 +67,19 @@ def detr_predict(model, image):
     # Scale the class probabilities to add up to 1
     probas = output['pred_logits'].softmax(-1)[0,:,:-1]
 
-    # Create a dict for outputs
+    # Create outputs
     boxes = rescale_bboxes(output['pred_boxes'][0], (t_image.size()[3], t_image.size()[2])).detach()
+    labels = probas.max(-1).indices
+    conf = probas.max(-1).values.detach()
 
-    predictions = { 'boxes' : boxes,
-                    'scores' : probas.max(-1).values,
-                    'labels' : probas.max(-1).indices}
+    ### Threshold scores
+    conf = conf.detach()
+    keep = conf > thresh
 
-    return predictions
+    # Filter out scores, boxes, and labels using threshold
+    conf = conf[keep]
+    boxes = boxes.detach()[keep]
+    labels = labels.detach()[keep]
+
+    return boxes, labels, conf
 

@@ -11,7 +11,7 @@ To use it with the webcam just ommit the filename:
 Running the command
 
     run.py
-
+I 
 without any arguments just opens the webcam and displays its output.
 
 
@@ -35,12 +35,18 @@ import sys
 import torch
 
 from ssd_pytorch.ssd import ssdModel as ssd
-from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
-from faster_rcnn.fasterrcnn import predict
+
+from detr.detr import detr_load as detr
+from detr.detr import detr_predict
+
 from visualizer.pascal import drawBoxes as pascalBoxes
+from visualizer.coco import draw_boxes as cocoBoxes
+
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
+
 import visualizer.signs as signs
+
 import tools.logger as logger
 
 
@@ -54,9 +60,11 @@ def runProgram(model_type, video_file, logs_enabled):
     if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
         net, predictor = ssd(model_type)
     elif (model_type == "-fasterrcnn"):
-        predictor = frcnn()
+        #predictor = frcnn()
+        print("Faster R-CNN is not integrated yet. Aborting...")
+        exit()
     elif (model_type == "-detr"):
-        print("DETR")
+        predictor = detr()
     else:
         model_enabled = 0
 
@@ -116,9 +124,12 @@ def runProgram(model_type, video_file, logs_enabled):
             model_enabled = cv.getTrackbarPos(modelSliderLabel, windowname)
 
         # Locate objects with model if selected
-        if (len(sys.argv) >= 2 and model_enabled == 1):
+        if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr"):
             boxes, labels, conf = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, conf, boxes, labels)
+        elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-detr"):
+            boxes, labels, conf = detr_predict(predictor, image)
+            frame = cocoBoxes(image, boxes, labels, conf)
 
          # Get time after detection
         stats_core[2] = time.time()
@@ -127,11 +138,11 @@ def runProgram(model_type, video_file, logs_enabled):
         if (statsFlag == 1):
             frame = showCoreStats(frame, stats_core) 
         if (statsFlag == 1) and (model_enabled == 1):
-            frame = showModelStats(frame, labels, conf)
+            frame = showModelStats(frame, model_type, labels, conf)
 
         # Enable symbols
         if (model_enabled == 1):
-            frame = signs.showStopSign(frame, stop_sign, labels, conf)
+            frame = signs.showStopSign(frame, model_type, stop_sign, labels, conf)
         
         # Write logs if enables
         if logs_enabled is True:

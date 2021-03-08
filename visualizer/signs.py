@@ -18,17 +18,24 @@ def load():
     return signs
 
 
-def showStopSign(frame, stop_sign, labels, conf):
+def showStopSign(frame, model_type, stop_sign, labels, conf):
     """
     Args:
-    frame   - Opencv frame object
-    labels  - List with predicted labels
-    conf    - List with confidences of each prediction
+    frame       -- Opencv frame object
+    model_type  -- String with model type
+    labels      -- List with predicted labels
+    conf        -- List with confidences of each prediction
     
     Returns:
     frame   - Frame with stopsign displayed if sign is detected
     """
-    stop_sign_label = 15 # Use class person for test
+    
+    # COCO dataset
+    if (model_type == "-detr"):
+        stop_sign_label = 13
+    # Pascal dataset
+    else:
+        stop_sign_label = 15 # Use class person for test
 
     if (stop_sign_label in labels):
         # Show stop sign symbol
