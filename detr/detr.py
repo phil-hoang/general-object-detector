@@ -68,7 +68,7 @@ def detr_predict(model, image, thresh=0.9):
     probas = output['pred_logits'].softmax(-1)[0,:,:-1]
 
     # Create outputs
-    boxes = rescale_bboxes(output['pred_boxes'][0], (t_image.size()[3], t_image.size()[2])).detach()
+    boxes = rescale_bboxes(output['pred_boxes'][0], (image.shape[1], image.shape[0])).detach()
     labels = probas.max(-1).indices
     conf = probas.max(-1).values.detach()
 
