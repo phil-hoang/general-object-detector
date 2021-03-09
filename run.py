@@ -20,8 +20,8 @@ SSD with Mobilenet          | -ssdm
 SSD with Mobilenet Lite     | -ssdmlite
 SSD with VGG-16             | -ssdvgg       -> TODO
 YOLO v?                     | -yolo         -> TODO
-DETR with Resnet50          | -detr         -> TODO
-Faster R-CNN with ?         | -fasterrcnn   -> TODO
+DETR with Resnet50          | -detr
+Faster R-CNN with Resnet50  | -fasterrcnn
 
 
 
@@ -33,23 +33,16 @@ import cv2 as cv
 import time
 import sys
 import torch
-
 from ssd_pytorch.ssd import ssdModel as ssd
-
 from detr.detr import detr_load as detr
 from detr.detr import detr_predict
-
 from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
 from faster_rcnn.fasterrcnn import frcnn_predict
-
 from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.coco import draw_boxes as cocoBoxes
-
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
-
 import visualizer.signs as signs
-
 import tools.logger as logger
 
 

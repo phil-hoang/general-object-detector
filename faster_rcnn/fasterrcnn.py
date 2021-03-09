@@ -23,7 +23,7 @@ def fasterRcnnModel():
     return model
 
 
-def frcnn_predict(model, frame, thresh = 0.5):
+def frcnn_predict(model, frame, thresh = 0.8):
     """
     Predict with faster rcnn
 
@@ -31,10 +31,9 @@ def frcnn_predict(model, frame, thresh = 0.5):
     frame - OpenCV image in BGR
 
     Return:
-    boxes
-    labels
-    probs
-
+    boxes       -- Torch tensor of coordinates of the top left and bottom right of the bounding box ordered as [(x1, y1, x2, y2)]
+    labels      -- Torch tensor of index labels for each bounding box [<label indices>]
+    scores      -- Torch tensor of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes 
     """
     
 
