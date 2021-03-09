@@ -39,6 +39,9 @@ from ssd_pytorch.ssd import ssdModel as ssd
 from detr.detr import detr_load as detr
 from detr.detr import detr_predict
 
+from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
+from faster_rcnn.fasterrcnn import frcnn_predict
+
 from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.coco import draw_boxes as cocoBoxes
 
@@ -60,9 +63,9 @@ def runProgram(model_type, video_file, logs_enabled):
     if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
         net, predictor = ssd(model_type)
     elif (model_type == "-fasterrcnn"):
-        #predictor = frcnn()
-        print("Faster R-CNN is not integrated yet. Aborting...")
-        exit()
+        predictor = frcnn()
+        #print("Faster R-CNN is not integrated yet. Aborting...")
+        #exit()
     elif (model_type == "-detr"):
         predictor = detr()
     else:
@@ -124,11 +127,14 @@ def runProgram(model_type, video_file, logs_enabled):
             model_enabled = cv.getTrackbarPos(modelSliderLabel, windowname)
 
         # Locate objects with model if selected
-        if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr"):
+        if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr" and model_type != "-fasterrcnn"):
             boxes, labels, conf = predictor.predict(image, 10, 0.4)
             frame = pascalBoxes(image, conf, boxes, labels)
         elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-detr"):
             boxes, labels, conf = detr_predict(predictor, image)
+            frame = cocoBoxes(image, boxes, labels, conf)
+        elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-fasterrcnn"):
+            boxes, labels, conf = frcnn_predict(predictor, image)
             frame = cocoBoxes(image, boxes, labels, conf)
 
          # Get time after detection

@@ -4,8 +4,8 @@ Faster R-CNN Model
 
 """
 import torchvision
-from torchvision.transforms import ToTensor
 import torch
+import torchvision.transforms as T
 import cv2 as cv
 
 
@@ -23,7 +23,7 @@ def fasterRcnnModel():
     return model
 
 
-def predict(model, frame, a, b):
+def frcnn_predict(model, frame, thresh = 0.5):
     """
     Predict with faster rcnn
 
@@ -36,16 +36,45 @@ def predict(model, frame, a, b):
     probs
 
     """
+    
 
-    frame_normed = cv.normalize(frame, frame, 0, 255, cv.NORM_MINMAX) 
-    frame_normed = ToTensor()(frame_normed)
+    # Preprocess image
+    transform = T.Compose([
+    T.ToPILImage(),
+    T.Resize(600),
+    T.ToTensor(),
+    ])
+
+    t_image = transform(frame).unsqueeze(0)
         
-    print(frame_normed.shape)
+    # Predict
+    # output is a List(Dict(Tensors)) where the dictionary has boxes, labels, and scores
+    output = model(t_image)
 
-    im_list = []
-    im_list.append(frame_normed)
-        
-    # Predict and make bounding boxes
-    predictions = model(im_list)
+    # Unpack the output into arrays
+    boxes = output[0]["boxes"].detach()
+    labels = output[0]["labels"].detach()
+    conf = output[0]["scores"].detach()
+    
+    # Threshold results
+    keep = conf > thresh
 
-    return predictions
+    boxes = boxes[keep]
+    labels = labels[keep]
+    conf = conf[keep]
+
+    # Resize bounding boxes to match the original size of the image
+    img_w = frame.shape[1]/t_image.size()[3]
+    img_h = frame.shape[0]/t_image.size()[2]
+
+    boxes = boxes * torch.tensor([img_w, img_h, img_w, img_h], dtype=torch.float32)
+
+    """
+    print(boxes)
+    print(labels)
+    print(conf)
+    print(t_image.size())
+    print(frame.shape)
+    """
+
+    return boxes, labels, conf
