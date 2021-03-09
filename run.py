@@ -57,8 +57,6 @@ def runProgram(model_type, video_file, logs_enabled):
         net, predictor = ssd(model_type)
     elif (model_type == "-fasterrcnn"):
         predictor = frcnn()
-        #print("Faster R-CNN is not integrated yet. Aborting...")
-        #exit()
     elif (model_type == "-detr"):
         predictor = detr()
     else:
@@ -74,7 +72,7 @@ def runProgram(model_type, video_file, logs_enabled):
     else:
         # Video mode
         cap = cv.VideoCapture("media/DrivingClips/" + video_file + ".mp4")
-        #out = cv.VideoWriter('dev/output.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), 12.0, (1280, 720))
+        #out = cv.VideoWriter('dev/output.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), 12.0, (1280, 720)) # TODO: Fix parameters to make video run smooth
         if not cap.isOpened():
             print("ERROR! Cannot read video")
             exit()
@@ -137,7 +135,7 @@ def runProgram(model_type, video_file, logs_enabled):
         if (statsFlag == 1):
             frame = showCoreStats(frame, stats_core) 
         if (statsFlag == 1) and (model_enabled == 1):
-            frame = showModelStats(frame, model_type, labels, conf)
+            frame, model_stats = showModelStats(frame, model_type, labels, conf)
 
         # Enable symbols
         if (model_enabled == 1):
@@ -145,7 +143,7 @@ def runProgram(model_type, video_file, logs_enabled):
         
         # Write logs if enables
         if logs_enabled is True:
-            logs = logger.writeLog(logs, stats_core[1], stats_core[2], labels, conf)
+            logs = logger.writeLog(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
 
         # Display the resulting frame
         cv.imshow(windowname, frame)

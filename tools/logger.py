@@ -4,6 +4,7 @@ import pickle
 
 from os import listdir
 from os.path import isfile, join
+import re
 
 
 def initialize():
@@ -13,13 +14,20 @@ def initialize():
     Returns:
     logs    -- Dictionary with defined keys
     """
-    stats = ["inference_time", "num_objects", "min_conf"]
+    #stats = ["inference_time", "num_objects", "min_conf"]
+    stats = ["inference_time",
+            "numCars", "confMinCars", "confMaxCars",
+            "numTrucksBuses", "confMinTrucksBuses", "confMaxTrucksBuses",
+            "numMotorCycles", "confMinMotorCycles", "confMaxMotorCycles",
+            "numBikes", "confMinBikes", "confMaxBikes",
+            "numPed", "confMinPed", "confMaxPed",
+            "numSign", "confMinSign", "confMaxSign"]
     logs = {new_list: [] for new_list in stats}
 
     return logs
 
 
-def writeLog(logs, time_begin, time_end, labels, conf):
+def writeLog(logs, time_begin, time_end, labels, conf, model_stats):
     """
     Writes log info into dictionary.
 
@@ -29,17 +37,22 @@ def writeLog(logs, time_begin, time_end, labels, conf):
     time_end    -- End of inference time for current frame
     labels      -- Torch tensor with object label indices
     conf        -- Torch tensor with detection confidences
+    model_stats -- Dictionary with model stats
 
     Return:
     logs        -- Updated dictionary with log information
     """
+    stats = ["numCars", "confMinCars", "confMaxCars",
+            "numTrucksBuses", "confMinTrucksBuses", "confMaxTrucksBuses",
+            "numMotorCycles", "confMinMotorCycles", "confMaxMotorCycles",
+            "numBikes", "confMinBikes", "confMaxBikes",
+            "numPed", "confMinPed", "confMaxPed",
+            "numSign", "confMinSign", "confMaxSign"]
+    
     logs["inference_time"].append(time_end - time_begin)
-    if (len(labels.numpy() > 0)):
-        logs["num_objects"].append(len(labels.numpy()))
-        logs["min_conf"].append(min(conf.numpy()))
-    else:
-        logs["num_objects"].append(None)
-        logs["min_conf"].append(None)
+    
+    for stat in stats:
+        logs[str(stat)].append(model_stats[stat])
 
     return logs
 
