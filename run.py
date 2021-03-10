@@ -52,6 +52,10 @@ def nothing(x):
 
 #%%
 def runProgram(model_type, video_file, logs_enabled):
+    # Sets which frame to process. E.g. 10 means predict on every 10th frame only, 1 is for all processing all frames.
+    sampleNumber = 1 # Default: 1
+    writeOutput = False
+    
     #%% Model selection if chosen in command line
     if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
         net, predictor = ssd(model_type)
@@ -72,7 +76,9 @@ def runProgram(model_type, video_file, logs_enabled):
     else:
         # Video mode
         cap = cv.VideoCapture("media/DrivingClips/" + video_file + ".mp4")
-        #out = cv.VideoWriter('dev/output.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), 12.0, (1280, 720)) # TODO: Fix parameters to make video run smooth
+        fps = cap.get(cv.CAP_PROP_FPS)
+        if writeOutput == True:
+            out = cv.VideoWriter('dev/output.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, (1280, 720))
         if not cap.isOpened():
             print("ERROR! Cannot read video")
             exit()
@@ -100,6 +106,7 @@ def runProgram(model_type, video_file, logs_enabled):
         logs = logger.initialize()
 
     #%% Loop through each frame
+    counter = 0
     while True:
         # Get time before detection
         stats_core[1] = time.time()
@@ -117,37 +124,43 @@ def runProgram(model_type, video_file, logs_enabled):
         if (len(sys.argv) >= 2):
             model_enabled = cv.getTrackbarPos(modelSliderLabel, windowname)
 
-        # Locate objects with model if selected
-        if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr" and model_type != "-fasterrcnn"):
-            boxes, labels, conf = predictor.predict(image, 10, 0.4)
-            frame = pascalBoxes(image, conf, boxes, labels)
-        elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-detr"):
-            boxes, labels, conf = detr_predict(predictor, image)
-            frame = cocoBoxes(image, boxes, labels, conf)
-        elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-fasterrcnn"):
-            boxes, labels, conf = frcnn_predict(predictor, image)
-            frame = cocoBoxes(image, boxes, labels, conf)
-
-         # Get time after detection
-        stats_core[2] = time.time()
-
-        #  Display stats if selected with slider
-        if (statsFlag == 1):
-            frame = showCoreStats(frame, stats_core) 
-        if (statsFlag == 1) and (model_enabled == 1):
-            frame, model_stats = showModelStats(frame, model_type, labels, conf)
-
-        # Enable symbols
-        if (model_enabled == 1):
-            frame = signs.showStopSign(frame, model_type, stop_sign, labels, conf)
+        if ((counter % sampleNumber) == 0):
+            counter = 0
+            # Locate objects with model if selected
+            if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr" and model_type != "-fasterrcnn"):
+                boxes, labels, conf = predictor.predict(image, 10, 0.4)
+                frame = pascalBoxes(image, conf, boxes, labels)
+            elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-detr"):
+                boxes, labels, conf = detr_predict(predictor, image)
+                frame = cocoBoxes(image, boxes, labels, conf)
+            elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-fasterrcnn"):
+                boxes, labels, conf = frcnn_predict(predictor, image)
+                frame = cocoBoxes(image, boxes, labels, conf)
         
-        # Write logs if enables
-        if logs_enabled is True:
-            logs = logger.writeLog(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
 
-        # Display the resulting frame
-        cv.imshow(windowname, frame)
-        #out.write(frame)
+            # Get time after detection
+            stats_core[2] = time.time()
+
+            #  Display stats if selected with slider
+            if (statsFlag == 1):
+                frame = showCoreStats(frame, stats_core) 
+            if (statsFlag == 1) and (model_enabled == 1):
+                frame, model_stats = showModelStats(frame, model_type, labels, conf)
+
+            # Enable symbols
+            if (model_enabled == 1):
+                frame = signs.showStopSign(frame, model_type, stop_sign, labels, conf)
+            
+            # Write logs if enables
+            if logs_enabled is True:
+                logs = logger.writeLog(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
+
+            # Display the resulting frame
+            cv.imshow(windowname, frame)
+            if writeOutput == True:
+                out.write(frame)
+
+        counter = counter + 1
         if cv.waitKey(1) == ord('q'):
             break
     
@@ -157,7 +170,8 @@ def runProgram(model_type, video_file, logs_enabled):
 
     # When everything is done, release the capture
     cap.release()
-    #out.release()
+    if writeOutput == True:
+        out.release()
     cv.destroyAllWindows()
 
 
