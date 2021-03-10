@@ -1,15 +1,6 @@
 import cv2 as cv
 import numpy as np
 
-
-def constants_coco():
-
-
-    
-    return constants
-
-
-
 def showStats(image, model_type, labels, conf):
     """
     Displays a count of selected objects in the image.
@@ -66,9 +57,10 @@ def showStats(image, model_type, labels, conf):
             model_stats["confMaxCars"] = None
             confCars = ""
 
-        if (len(conf[np.where(labels == 6)])) > 0:
-            model_stats["confMinTrucksBuses"] = min(conf[np.where((labels == 6) )]) # Second: 8
-            model_stats["confMaxTrucksBuses"] = max(conf[np.where(labels == 6)])
+        if (len(conf[np.where(labels == 6)]) or len(conf[np.where(labels == 8)])) > 0:
+            res = np.append(np.where(labels == 6), np.where(labels == 8))
+            model_stats["confMinTrucksBuses"] = min(conf[res])
+            model_stats["confMaxTrucksBuses"] = max(conf[res])
             confTrucksBuses = '({:.2f}, {:.2f})'.format(model_stats["confMinTrucksBuses"], model_stats["confMaxTrucksBuses"])
         else:
             model_stats["confMinTrucksBuses"] = None
@@ -76,7 +68,6 @@ def showStats(image, model_type, labels, conf):
             confTrucksBuses = ""
 
         if (len(conf[np.where(labels == 4)])) > 0:
-            #confMotorCycles = '({:.2f})'.format(min(conf[np.where(labels == 4)]))
             model_stats["confMinMotorCycles"] = min(conf[np.where(labels == 4)])
             model_stats["confMaxMotorCycles"] = max(conf[np.where(labels == 4)])
             confMotorCycles = '({:.2f}, {:.2f})'.format(model_stats["confMinMotorCycles"], model_stats["confMaxMotorCycles"])
@@ -86,7 +77,6 @@ def showStats(image, model_type, labels, conf):
             confMotorCycles = ""
 
         if (len(conf[np.where(labels == 2)])) > 0:
-            #confBikes = '({:.2f})'.format(min(conf[np.where(labels == 2)]))
             model_stats["confMinBikes"] = min(conf[np.where(labels == 2)])
             model_stats["confMaxBikes"] = max(conf[np.where(labels == 2)])
             confBikes = '({:.2f}, {:.2f})'.format(model_stats["confMinBikes"], model_stats["confMaxBikes"])
@@ -96,7 +86,6 @@ def showStats(image, model_type, labels, conf):
             confBikes = ""
 
         if (len(conf[np.where(labels == 1)])) > 0:
-            #confPed = '({:.2f})'.format(min(conf[np.where(labels == 1)]))
             model_stats["confMinPed"] = min(conf[np.where(labels == 1)])
             model_stats["confMaxPed"] = max(conf[np.where(labels == 1)])
             confPed = '({:.2f}, {:.2f})'.format(model_stats["confMinPed"], model_stats["confMaxPed"])
@@ -106,9 +95,9 @@ def showStats(image, model_type, labels, conf):
             confPed = ""
 
         if (len(conf[np.where(labels == 10)]) or len(conf[np.where(labels == 13)])) > 0:
-            #confSigns = '({:.2f})'.format(min(conf[np.where(labels == 10) or labels == 13])) # Stop sign: 13
-            model_stats["confMinSigns"] = min(conf[np.where((labels == 10) or (labels == 13))])    
-            model_stats["confMaxSigns"] = max(conf[np.where((labels == 10) or (labels == 13))])
+            res = np.append(np.where(labels == 10), np.where(labels == 13))
+            model_stats["confMinSigns"] = min(conf[res])    
+            model_stats["confMaxSigns"] = max(conf[res])
             confSigns = '({:.2f}, {:.2f})'.format(model_stats["confMinSigns"], model_stats["confMaxSigns"])
         else:
             model_stats["confMinSigns"] = None
