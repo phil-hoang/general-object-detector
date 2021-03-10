@@ -35,7 +35,7 @@ def showStopSign(frame, model_type, stop_sign, labels, conf):
         stop_sign_label = 13
     # Pascal dataset
     else:
-        stop_sign_label = 15 # Use class person for test
+        stop_sign_label = 50 # No stop sign in Pascal
 
     if (stop_sign_label in labels):
         # Show stop sign symbol

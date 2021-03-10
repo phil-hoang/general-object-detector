@@ -53,8 +53,9 @@ def nothing(x):
 #%%
 def runProgram(model_type, video_file, logs_enabled):
     # Sets which frame to process. E.g. 10 means predict on every 10th frame only, 1 is for all processing all frames.
-    sampleNumber = 1 # Default: 1
+    sampleNumber = 2 # Default: 1
     writeOutput = False
+    outputName = "suburban-4-landing"
     
     #%% Model selection if chosen in command line
     if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
@@ -78,7 +79,7 @@ def runProgram(model_type, video_file, logs_enabled):
         cap = cv.VideoCapture("media/DrivingClips/" + video_file + ".mp4")
         fps = cap.get(cv.CAP_PROP_FPS)
         if writeOutput == True:
-            out = cv.VideoWriter('dev/output.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, (1280, 720))
+            out = cv.VideoWriter('dev/' + outputName + '.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, (1280, 720))
         if not cap.isOpened():
             print("ERROR! Cannot read video")
             exit()
@@ -140,7 +141,6 @@ def runProgram(model_type, video_file, logs_enabled):
 
             # Get time after detection
             stats_core[2] = time.time()
-
             #  Display stats if selected with slider
             if (statsFlag == 1):
                 frame = showCoreStats(frame, stats_core) 
