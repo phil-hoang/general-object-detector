@@ -18,14 +18,17 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
 
     # Class label indices
     labelsMotor = [6, 3, 4, 8]
-    labelsPerson = [1, 2]
+    labelsPerson = [1]
     labelsSigns = [10, 13]
+    labelsBike = [2]
 
     # Colours used for the bounding boxes
     colourMotor = (255, 0, 0)
     colourPerson = (0, 0, 255)
+    colourBike = (255,165,0)
     colourSigns = (0, 255, 0)
-    colourOther = (255, 165, 0)
+    colourOther = (220, 220, 220)
+    
 
     # TODO: rename
     labels_id = labels
@@ -38,6 +41,9 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
         elif (labels_id[i] in labelsPerson):
             box = boxes[i, :]
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourMotor, 2)
+        elif (labels_id[i] in labelsBike):
+            box = boxes[i, :]
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourBike, 2)
         elif (labels_id[i] in labelsSigns):
             box = boxes[i, :]
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourSigns, 2)
