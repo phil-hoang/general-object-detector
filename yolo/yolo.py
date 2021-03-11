@@ -28,7 +28,7 @@ def yoloModel():
 
     return model
 
-def yolo_predict(model, frame, thresh = 0.9):
+def yolo_predict(model, frame, thresh = 0.5):
     """
     Predict with faster rcnn
 
@@ -51,6 +51,13 @@ def yolo_predict(model, frame, thresh = 0.9):
     conf = result[:,4]
     labels = result[:,5].type(torch.LongTensor)
 
+    # Apply threshold
+    keep = conf > thresh
+    boxes = boxes[keep]
+    conf = conf[keep]
+    labels = labels[keep]
+
+    # Convert COCO labels because some classes were removed
     labels = coco80_to_coco91_class(labels)
 
     return boxes, labels, conf
