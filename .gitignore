@@ -133,3 +133,4 @@ dmypy.json
 dev/
 *.mp4
 *.pth
+*.log

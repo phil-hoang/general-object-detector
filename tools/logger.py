@@ -74,7 +74,7 @@ def saveLogs(logs, name_in, model_type):
     name_in = name_in + "_"+ model_type[1:]
 
     # Set path out
-    path_out = "dev/logs"
+    path_out = "logs"
 
     # Make new filename index for file with the same name
     # Get filenames in folder

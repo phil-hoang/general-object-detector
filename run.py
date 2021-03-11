@@ -53,9 +53,9 @@ def nothing(x):
 #%%
 def runProgram(model_type, video_file, logs_enabled):
     # Sets which frame to process. E.g. 10 means predict on every 10th frame only, 1 is for all processing all frames.
-    sampleNumber = 2 # Default: 1
-    writeOutput = False
-    outputName = "suburban-4-landing"
+    sampleNumber = 1 # Default: 1
+    writeOutput = True
+    outputName = "urban-8"
     
     #%% Model selection if chosen in command line
     if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
@@ -157,7 +157,7 @@ def runProgram(model_type, video_file, logs_enabled):
 
             # Display the resulting frame
             cv.imshow(windowname, frame)
-            if writeOutput == True:
+            if ((writeOutput == True) and (video_file != None)):
                 out.write(frame)
 
         counter = counter + 1
@@ -170,7 +170,7 @@ def runProgram(model_type, video_file, logs_enabled):
 
     # When everything is done, release the capture
     cap.release()
-    if writeOutput == True:
+    if ((writeOutput == True) and (video_file != None)):
         out.release()
     cv.destroyAllWindows()
 
