@@ -131,6 +131,9 @@ dmypy.json
 
 # Add folder
 dev/
+media/landingVideo
 *.mp4
+*.mov
+*.avi
 *.pth
 *.log
