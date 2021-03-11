@@ -4,10 +4,23 @@ YOLOv3 Model
 
 import torch
 import torchvision.transforms as T
+from torchvision.ops import nms
+
+def coco80_to_coco91_class(label):  
+    # converts 80-index (val2014) to 91-index (paper)
+    
+    coco91_classes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 31, 32, 33, 34,
+                35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+                64, 65, 67, 70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 84, 85, 86, 87, 88, 89, 90]
+
+    x = [coco91_classes[i] for i in label]
+    x = torch.LongTensor(x)
+
+    return x
 
 def yoloModel():
     """
-    Loads the YOLOv3 model from ultralytics
+    Loads the YOLOv5 model from ultralytics
     """
 
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True).autoshape()
@@ -15,7 +28,7 @@ def yoloModel():
 
     return model
 
-def yolo_predict(model, frame, thresh = 0.8):
+def yolo_predict(model, frame, thresh = 0.9):
     """
     Predict with faster rcnn
 
@@ -27,47 +40,18 @@ def yolo_predict(model, frame, thresh = 0.8):
     labels      -- Torch tensor of index labels for each bounding box [<label indices>]
     scores      -- Torch tensor of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes 
     """
-    
 
-    # Preprocess image
-    transform = T.Compose([
-    T.ToPILImage(),
-    T.Resize((640,640)),
-    T.ToTensor(),
-    ])
-
-    t_image = transform(frame).unsqueeze(0)
-        
     # Predict
-    # output is a tuple where the first one has shape [(1, number of bounding box confs, 85 which represents 4 coordinates + number of classes)] and
-    # the second has a bunch of gradients or something
-    output = model(t_image)
-    print(*output[0].shape)
+    output = model(frame)
 
-    # Unpack the output into arrays
-    boxes = output[0]["boxes"].detach()
-    labels = output[0]["labels"].detach()
-    conf = output[0]["scores"].detach()
+    # Unpack the output
+    result = output.xyxy[0]
     
-    # Threshold results
-    keep = conf > thresh
+    boxes = result[:,:4]
+    conf = result[:,4]
+    labels = result[:,5].type(torch.LongTensor)
 
-    boxes = boxes[keep]
-    labels = labels[keep]
-    conf = conf[keep]
-
-    # Resize bounding boxes to match the original size of the image
-    img_w = frame.shape[1]/t_image.size()[3]
-    img_h = frame.shape[0]/t_image.size()[2]
-
-    boxes = boxes * torch.tensor([img_w, img_h, img_w, img_h], dtype=torch.float32)
-
-    """
-    print(boxes)
-    print(labels)
-    print(conf)
-    print(t_image.size())
-    print(frame.shape)
-    """
+    labels = coco80_to_coco91_class(labels)
 
     return boxes, labels, conf
+

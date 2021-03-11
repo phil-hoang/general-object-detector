@@ -19,7 +19,7 @@ Currently supported models and arguments to call it:
 SSD with Mobilenet          | -ssdm
 SSD with Mobilenet Lite     | -ssdmlite
 SSD with VGG-16             | -ssdvgg       -> TODO
-YOLO v?                     | -yolo         -> TODO
+YOLO v5s                    | -yolo         -> TODO
 DETR with Resnet50          | -detr
 Faster R-CNN with Resnet50  | -fasterrcnn
 
@@ -38,6 +38,8 @@ from detr.detr import detr_load as detr
 from detr.detr import detr_predict
 from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
 from faster_rcnn.fasterrcnn import frcnn_predict
+from yolo.yolo import yoloModel as yolo
+from yolo.yolo import yolo_predict
 from visualizer.pascal import drawBoxes as pascalBoxes
 from visualizer.coco import draw_boxes as cocoBoxes
 from visualizer.stats_core import showStats as showCoreStats
@@ -64,6 +66,8 @@ def runProgram(model_type, video_file, logs_enabled):
         predictor = frcnn()
     elif (model_type == "-detr"):
         predictor = detr()
+    elif (model_type == "-yolov5s"):
+        predictor = yolo()
     else:
         model_enabled = 0
 
@@ -128,7 +132,7 @@ def runProgram(model_type, video_file, logs_enabled):
         if ((counter % sampleNumber) == 0):
             counter = 0
             # Locate objects with model if selected
-            if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr" and model_type != "-fasterrcnn"):
+            if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr" and model_type != "-fasterrcnn" and model_type != "-yolov5s"):
                 boxes, labels, conf = predictor.predict(image, 10, 0.4)
                 frame = pascalBoxes(image, conf, boxes, labels)
             elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-detr"):
@@ -137,6 +141,10 @@ def runProgram(model_type, video_file, logs_enabled):
             elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-fasterrcnn"):
                 boxes, labels, conf = frcnn_predict(predictor, image)
                 frame = cocoBoxes(image, boxes, labels, conf)
+            elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-yolov5s"):
+                boxes, labels, conf = yolo_predict(predictor, image)
+                frame = cocoBoxes(image, boxes, labels, conf)
+
         
 
             # Get time after detection
@@ -177,7 +185,7 @@ def runProgram(model_type, video_file, logs_enabled):
 
 if __name__ == '__main__':
     # Allow no model or selected model
-    supported_models = ["-ssdm", "-ssdmlite", "-ssdvgg", "-detr", "-fasterrcnn"]
+    supported_models = ["-ssdm", "-ssdmlite", "-ssdvgg", "-detr", "-fasterrcnn", "-yolov5s"]
     
     # Initialize log variable
     logs_enabled = False
@@ -206,7 +214,7 @@ if __name__ == '__main__':
             logs_enabled = True
 
     else:
-        print("Usage: <model> <video_filename> [opt: <-l>]\nAvailable models are: -ssdm, -ssdmlite, -ssdvgg, -fasterrcnn, -detr\nTo just run the webcam provide no args.")
+        print("Usage: <model> <video_filename> [opt: <-l>]\nAvailable models are: -ssdm, -ssdmlite, -ssdvgg, -fasterrcnn, -detr, -yolov5s\nTo just run the webcam provide no args.")
         exit()
 
     if (len(sys.argv) <= 2):
