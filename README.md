@@ -6,8 +6,10 @@ We currently support the models:
 * [SSD](https://arxiv.org/abs/1512.02325) with [VGG-16](https://arxiv.org/abs/1409.1556)
 * [Detr](https://arxiv.org/abs/2005.12872)
 * [Faster R-CNN](https://arxiv.org/abs/1506.01497)
+* [YOLO](https://arxiv.org/abs/1804.02767)
 
 The SSD model is taken from [here](https://github.com/qfgaohao/pytorch-ssd).
+The YOLO model is taken from [here](https://github.com/ultralytics/yolov5).
 
 ## Dependencies and setup
 * Python >= 3.79

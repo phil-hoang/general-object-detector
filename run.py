@@ -24,8 +24,8 @@ DETR with Resnet50          | -detr
 Faster R-CNN with Resnet50  | -fasterrcnn
 
 
-
 The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
+Yolo model is from here: https://github.com/ultralytics/yolov5
 """
 
 import numpy as np
@@ -55,7 +55,7 @@ def nothing(x):
 #%%
 def runProgram(model_type, video_file, logs_enabled):
     # Sets which frame to process. E.g. 10 means predict on every 10th frame only, 1 is for all processing all frames.
-    sampleNumber = 2 # Default: 1
+    sampleNumber = 1 # Default: 1
     writeOutput = False
     outputName = "suburban-4-landing"
     
