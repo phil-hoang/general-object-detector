@@ -18,7 +18,6 @@ without any arguments just opens the webcam and displays its output.
 Currently supported models and arguments to call it:
 SSD with Mobilenet          | -ssdm
 SSD with Mobilenet Lite     | -ssdmlite
-SSD with VGG-16             | -ssdvgg       -> TODO
 YOLO v?                     | -yolo         -> TODO
 DETR with Resnet50          | -detr
 Faster R-CNN with Resnet50  | -fasterrcnn
@@ -55,7 +54,7 @@ def runProgram(model_type, video_file, logs_enabled):
     # Sets which frame to process. E.g. 10 means predict on every 10th frame only, 1 is for all processing all frames.
     sampleNumber = 1 # Default: 1
     writeOutput = True
-    outputName = "urban-8"
+    outputName = video_file + model_type
     
     #%% Model selection if chosen in command line
     if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
@@ -78,8 +77,10 @@ def runProgram(model_type, video_file, logs_enabled):
         # Video mode
         cap = cv.VideoCapture("media/DrivingClips/" + video_file + ".mp4")
         fps = cap.get(cv.CAP_PROP_FPS)
+        dim = (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)) )
+        print(dim)
         if writeOutput == True:
-            out = cv.VideoWriter('dev/' + outputName + '.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, (1280, 720))
+            out = cv.VideoWriter('media/' + outputName + '.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, dim)
         if not cap.isOpened():
             print("ERROR! Cannot read video")
             exit()
