@@ -18,7 +18,7 @@ def detr_load():
 
     return model
 
-def detr_predict(model, image, thresh=0.98):
+def detr_predict(model, image, thresh=0.95):
     """
     Function used to preprocess the image, feed it into the detr model, and prepare the output draw bounding boxes.
     Outputs are thresholded.
