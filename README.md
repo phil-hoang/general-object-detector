@@ -11,11 +11,15 @@ We currently support the models:
 The SSD model is taken from [here](https://github.com/qfgaohao/pytorch-ssd).
 The YOLO model is taken from [here](https://github.com/ultralytics/yolov5).
 
+
+![Example](media/detr-example.jpg)
+
+
 ## Dependencies and setup
-* Python >= 3.79
+* Python ≥ 3.7.10
 * OpenCV2
-* PyTorch >= 1.6.0
-* Torchvision >= 0.7.0
+* PyTorch ≥ 1.7.1
+* Torchvision ≥ 0.8.2
 
 To use the video function place `.mp4` videos into the folder `media/DrivingClips`.
 

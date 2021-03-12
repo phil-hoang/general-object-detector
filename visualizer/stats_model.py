@@ -38,7 +38,7 @@ def showStats(image, model_type, labels, conf):
     model_stats = dict.fromkeys(keys)
 
     # COCO dataset
-    if (model_type == "-detr" or model_type == "-fasterrcnn"):
+    if (model_type == "-detr" or model_type == "-fasterrcnn" or model_type == "-yolov5s"):
         model_stats["numCars"] = np.count_nonzero(labels == 3)
         model_stats["numTrucksBuses"] = np.count_nonzero(labels == 6) + np.count_nonzero(labels == 8)
         model_stats["numMotorCycles"] = np.count_nonzero(labels == 4)
