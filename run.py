@@ -87,7 +87,6 @@ def runProgram(model_type, video_file, logs_enabled):
         cap = cv.VideoCapture("media/DrivingClips/" + video_file + ".mp4")
         fps = cap.get(cv.CAP_PROP_FPS)
         dim = (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)) )
-        print(dim)
         if writeOutput == True:
             out = cv.VideoWriter('media/' + outputName + '.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, dim)
         if not cap.isOpened():
