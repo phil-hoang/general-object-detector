@@ -31,7 +31,7 @@ def showStopSign(frame, model_type, stop_sign, labels, conf):
     """
     
     # COCO dataset
-    if (model_type == "-detr" or model_type == "-fasterrcnn"):
+    if (model_type == "-detr" or model_type == "-fasterrcnn" or model_type == "-yolov5s"):
         stop_sign_label = 13
     # Pascal dataset
     else:

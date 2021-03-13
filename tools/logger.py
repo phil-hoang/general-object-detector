@@ -5,6 +5,7 @@ import pickle
 from os import listdir
 from os.path import isfile, join
 import re
+from pathlib import Path
 
 
 def initialize():
@@ -71,9 +72,10 @@ def saveLogs(logs, name_in, model_type):
     if name_in is None:
         name_in = "camera"
 
-    name_in = name_in + "_"+ model_type[1:]
+    name_in = name_in + "-"+ model_type[1:]
 
     # Set path out
+    Path("logs").mkdir(parents=True, exist_ok=True)
     path_out = "logs"
 
     # Make new filename index for file with the same name

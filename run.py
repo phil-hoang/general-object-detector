@@ -18,12 +18,7 @@ without any arguments just opens the webcam and displays its output.
 Currently supported models and arguments to call it:
 SSD with Mobilenet          | -ssdm
 SSD with Mobilenet Lite     | -ssdmlite
-<<<<<<< HEAD
-YOLO v?                     | -yolo         -> TODO
-=======
-SSD with VGG-16             | -ssdvgg       -> TODO
-YOLO v5s                    | -yolo         -> TODO
->>>>>>> 1ac787ba4df14fec45ead604aea4a92ec74ebef0
+YOLO v5s                    | -yolo 
 DETR with Resnet50          | -detr
 Faster R-CNN with Resnet50  | -fasterrcnn
 
@@ -36,6 +31,7 @@ import numpy as np
 import cv2 as cv
 import time
 import sys
+from pathlib import Path
 import torch
 from ssd_pytorch.ssd import ssdModel as ssd
 from detr.detr import detr_load as detr
@@ -57,12 +53,10 @@ def nothing(x):
     pass
 
 #%%
-def runProgram(model_type, video_file, logs_enabled):
+def runProgram(model_type, video_file, logs_enabled, writeOutput=False):
     # Sets which frame to process. E.g. 10 means predict on every 10th frame only, 1 is for all processing all frames.
     sampleNumber = 1 # Default: 1
-    writeOutput = True
-    outputName = video_file + model_type
-    
+ 
     #%% Model selection if chosen in command line
     if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
         net, predictor = ssd(model_type)
@@ -79,19 +73,26 @@ def runProgram(model_type, video_file, logs_enabled):
     if (video_file == None):
         # Camera mode
         cap = cv.VideoCapture(0)
+        fps = cap.get(cv.CAP_PROP_FPS)
+        dim = (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)) )
         if not cap.isOpened():
             print("ERROR! Cannot open camera")
             exit()
+        outputName = "camera" + model_type
     else:
         # Video mode
         cap = cv.VideoCapture("media/DrivingClips/" + video_file + ".mp4")
         fps = cap.get(cv.CAP_PROP_FPS)
         dim = (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)) )
-        if writeOutput == True:
-            out = cv.VideoWriter('media/' + outputName + '.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, dim)
         if not cap.isOpened():
             print("ERROR! Cannot read video")
             exit()
+        outputName = video_file + model_type
+
+    if writeOutput == True:
+        # Create folder if it doesn't exist
+        Path("media/ModelOutputs").mkdir(parents=True, exist_ok=True)
+        out = cv.VideoWriter('media/ModelOutputs/' + outputName + '.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, dim)
     
     # Create slider to turn stats and model on or off
     statsSliderLabel = 'Show stats'
@@ -170,7 +171,7 @@ def runProgram(model_type, video_file, logs_enabled):
 
             # Display the resulting frame
             cv.imshow(windowname, frame)
-            if ((writeOutput == True) and (video_file != None)):
+            if ((writeOutput == True)):
                 out.write(frame)
 
         counter = counter + 1
@@ -192,8 +193,9 @@ if __name__ == '__main__':
     # Allow no model or selected model
     supported_models = ["-ssdm", "-ssdmlite", "-ssdvgg", "-detr", "-fasterrcnn", "-yolov5s"]
     
-    # Initialize log variable
+    # Initialize log and write output variables
     logs_enabled = False
+    writeOutput = False
 
     # Camera mode without a model
     if (len(sys.argv) == 1):
@@ -208,6 +210,12 @@ if __name__ == '__main__':
             model_type = sys.argv[1]
             video_file = None
             logs_enabled = True
+    elif (len(sys.argv) == 4 and (sys.argv[1] in supported_models) and (sys.argv[2] == "-l") and (sys.argv[3] == "-r")):
+            model_type = sys.argv[1]
+            video_file = None
+            logs_enabled = True
+            writeOutput = True
+            print("Correct case")
 
     # Video file mode with a model
     elif (len(sys.argv) == 3 and (sys.argv[1] in supported_models)):
@@ -217,13 +225,19 @@ if __name__ == '__main__':
             model_type = sys.argv[1]
             video_file = sys.argv[2]
             logs_enabled = True
+            print("FAlse case")
+    elif (len(sys.argv) == 5 and (sys.argv[1] in supported_models) and (sys.argv[3] == "-l") and (sys.argv[4] == "-r")):
+            model_type = sys.argv[1]
+            video_file = sys.argv[2]
+            logs_enabled = True
+            writeOutput = True
 
     else:
-        print("Usage: <model> <video_filename> [opt: <-l>]\nAvailable models are: -ssdm, -ssdmlite, -ssdvgg, -fasterrcnn, -detr, -yolov5s\nTo just run the webcam provide no args.")
+        print("\nUsage: <model> <video_filename> \nopt: \n-l :writes logs\n-r :writes video file\nAvailable models are: -ssdm, -ssdmlite, -fasterrcnn, -detr, -yolov5s\nTo just run the webcam provide no args.\n")
         exit()
 
     if (len(sys.argv) <= 2):
         print("Starting camera ... \nPress q to exit ")
     else:
         print("Starting video ... \nPress q to exit ")
-    runProgram(model_type, video_file, logs_enabled)
+    runProgram(model_type, video_file, logs_enabled, writeOutput)
