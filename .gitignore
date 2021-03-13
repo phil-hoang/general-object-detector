@@ -136,4 +136,5 @@ media/landingVideo
 *.mov
 *.avi
 *.pth
+*.pt
 *.log
