@@ -44,3 +44,9 @@ To write information about the model like the minimum detection confidence or in
 ```
 run.py -ssdm video -l
 ```
+
+To write the video to disk, use `-r` in addition to `-l`
+
+```
+run.py -ssdm video -l -r
+```
