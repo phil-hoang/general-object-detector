@@ -29,22 +29,19 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
     colourSigns = (0, 255, 0)
     colourOther = (220, 220, 220)
     
-
-    # TODO: rename
-    labels_id = labels
     # Iterate through each instance
     for i in range(len(conf)):
          # Filter for classes
-        if (labels_id[i] in labelsMotor):
+        if (labels[i] in labelsMotor):
             box = boxes[i, :]
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourPerson, 2)
-        elif (labels_id[i] in labelsPerson):
+        elif (labels[i] in labelsPerson):
             box = boxes[i, :]
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourMotor, 2)
-        elif (labels_id[i] in labelsBike):
+        elif (labels[i] in labelsBike):
             box = boxes[i, :]
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourBike, 2)
-        elif (labels_id[i] in labelsSigns):
+        elif (labels[i] in labelsSigns):
             box = boxes[i, :]
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourSigns, 2)
         else:
@@ -53,3 +50,21 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
 
     image = cv.cvtColor(image, cv.COLOR_RGB2BGR)   
     return image
+
+def supportedModels():
+    """
+    Returns a list with the currently supported models.
+    """
+    models = ["-fasterrcnn", "-detr", "-yolov5s"]
+
+    return models
+
+
+def labels():
+    """
+    Returns a dict with relevant labels as keys and their index as value.
+    """
+    labels = {"car": 3, "truck": 6, "bus": 8, "motorcycle": 4, "bicycle": 2, "person": 1,
+    "stopsign": 13, "stoplight": 10}
+
+    return labels

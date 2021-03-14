@@ -3,6 +3,7 @@ Displays symbols
 
 """
 import cv2 as cv
+from visualizer import coco
 
 
 def load():
@@ -31,11 +32,11 @@ def showStopSign(frame, model_type, stop_sign, labels, conf):
     """
     
     # COCO dataset
-    if (model_type == "-detr" or model_type == "-fasterrcnn" or model_type == "-yolov5s"):
-        stop_sign_label = 13
+    if (model_type in coco.supportedModels()):
+        stop_sign_label = coco.labels()["stopsign"]
     # Pascal dataset
     else:
-        stop_sign_label = 50 # No stop sign in Pascal
+        stop_sign_label = 50 # No stop sign in Pascal, so take index which is not available
 
     if (stop_sign_label in labels):
         # Show stop sign symbol

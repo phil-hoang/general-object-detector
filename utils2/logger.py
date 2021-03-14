@@ -6,6 +6,7 @@ from os import listdir
 from os.path import isfile, join
 import re
 from pathlib import Path
+from utils2 import constants
 
 
 def initialize():
@@ -15,17 +16,14 @@ def initialize():
     Returns:
     logs    -- Dictionary with defined keys
     """
-    #stats = ["inference_time", "num_objects", "min_conf"]
-    stats = ["inference_time",
-            "numCars", "confMinCars", "confMaxCars",
-            "numTrucksBuses", "confMinTrucksBuses", "confMaxTrucksBuses",
-            "numMotorCycles", "confMinMotorCycles", "confMaxMotorCycles",
-            "numBikes", "confMinBikes", "confMaxBikes",
-            "numPed", "confMinPed", "confMaxPed",
-            "numSign", "confMinSign", "confMaxSign"]
-    logs = {new_list: [] for new_list in stats}
-
-    return logs
+    # Get dict with model stats
+    stats_model = constants.modelStats()
+    
+    # Add inference time key and merge
+    stats = {"inference_time":[]}
+    stats.update(stats_model)
+   
+    return stats
 
 
 def writeLog(logs, time_begin, time_end, labels, conf, model_stats):
@@ -43,13 +41,8 @@ def writeLog(logs, time_begin, time_end, labels, conf, model_stats):
     Return:
     logs        -- Updated dictionary with log information
     """
-    stats = ["numCars", "confMinCars", "confMaxCars",
-            "numTrucksBuses", "confMinTrucksBuses", "confMaxTrucksBuses",
-            "numMotorCycles", "confMinMotorCycles", "confMaxMotorCycles",
-            "numBikes", "confMinBikes", "confMaxBikes",
-            "numPed", "confMinPed", "confMaxPed",
-            "numSign", "confMinSign", "confMaxSign"]
-    
+
+    stats = constants.modelStats()
     logs["inference_time"].append(time_end - time_begin)
     
     for stat in stats:
