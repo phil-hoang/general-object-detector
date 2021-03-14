@@ -1,4 +1,5 @@
 import cv2 as cv
+from utils2 import constants
 
 def showStats(image, stats):
     """
@@ -13,12 +14,16 @@ def showStats(image, stats):
     Image - Opencv image object in RGB with stats
     """
 
+    # Calculate stats
     fps = stats[0]
-    text = "fps: {:2.0f}".format(fps)
-    cv.putText(image, text, (5, int(image.shape[0]/2)-20), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
-
     inference_time = stats[2] - stats[1]
-    text = "Inference time: {:5.4f}s".format(inference_time)
-    cv.putText(image, text, (5, int(image.shape[0]/2)), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
 
+    # Format text
+    texts = ["fps: {:2.0f}".format(fps), "Inference time: {:5.4f}s".format(inference_time)]
+
+    # Put texts onto image
+    for i in range(2):
+        cv.putText(image, texts[i], (5, int(image.shape[0]/2)-20+20*i), constants.statsFormat()["font"], 
+        constants.statsFormat()["fontsize"], constants.statsFormat()["colour"], 1)
+        
     return image

@@ -3,13 +3,7 @@ import cv2 as cv
 def drawBoxes(image, probs, boxes, labels):
     """
     Draws bounding boxes for selected classes of the Pascal dataset.
-    Classes are:
-    * Bicycle   | Label 2
-    * Bus       | Label 6
-    * Car       | Label 7
-    * Motorbike | Label 14
-    * Person    | Label 15
-
+   
     Box colours are:
     Motorized vehicles  | Blue
     Bicycles, person    | Red
@@ -45,3 +39,21 @@ def drawBoxes(image, probs, boxes, labels):
     # Convert colour channels back to BGR
     image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
     return image
+
+
+def supportedModels():
+    """
+    Returns a list with the currently supported models.
+    """
+    models = ["-ssdm", "-ssdmlite"]
+
+    return models
+
+
+def labels():
+    """
+    Returns a dict with relevant labels as keys and their index as value.
+    """
+    labels = {"car": 7, "bus": 6, "motorcycle": 14, "bicycle": 2, "person": 15}
+
+    return labels

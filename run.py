@@ -45,7 +45,8 @@ from visualizer.coco import draw_boxes as cocoBoxes
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
 import visualizer.signs as signs
-import tools.logger as logger
+import utils2.logger as logger
+import utils2.constants as constants
 
 
 # Required for the slider
@@ -225,7 +226,6 @@ if __name__ == '__main__':
             model_type = sys.argv[1]
             video_file = sys.argv[2]
             logs_enabled = True
-            print("FAlse case")
     elif (len(sys.argv) == 5 and (sys.argv[1] in supported_models) and (sys.argv[3] == "-l") and (sys.argv[4] == "-r")):
             model_type = sys.argv[1]
             video_file = sys.argv[2]
