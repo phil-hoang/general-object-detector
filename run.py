@@ -47,6 +47,7 @@ from visualizer.stats_model import showStats as showModelStats
 import visualizer.signs as signs
 import utils2.logger as logger
 import utils2.constants as constants
+import utils2.lane_detection as lanes
 
 
 # Required for the slider
@@ -169,6 +170,9 @@ def runProgram(model_type, video_file, logs_enabled, writeOutput=False):
             # Write logs if enables
             if logs_enabled is True:
                 logs = logger.writeLog(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
+
+            # Lane detection
+            #frame = lanes.detect(frame)
 
             # Display the resulting frame
             cv.imshow(windowname, frame)
