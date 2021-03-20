@@ -55,7 +55,7 @@ def nothing(x):
     pass
 
 #%%
-def runProgram(model_type, video_file, logs_enabled, writeOutput=False):
+def runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput=False):
     # Sets which frame to process. E.g. 10 means predict on every 10th frame only, 1 is for all processing all frames.
     sampleNumber = 1 # Default: 1
  
@@ -99,6 +99,7 @@ def runProgram(model_type, video_file, logs_enabled, writeOutput=False):
     # Create slider to turn stats and model on or off
     statsSliderLabel = 'Show stats'
     modelSliderLabel = 'Model OFF / ON'
+    laneSliderLabel = 'Lanes OFF / ON'
     if (len(sys.argv) <= 2):
         windowname = 'Live Detection'
     else:
@@ -107,6 +108,9 @@ def runProgram(model_type, video_file, logs_enabled, writeOutput=False):
     cv.createTrackbar(statsSliderLabel, windowname, 1, 1, nothing)
     if (len(sys.argv) >= 2):
         cv.createTrackbar(modelSliderLabel, windowname, 1, 1, nothing)
+    
+    if ("-lanes" in sys.argv):
+        cv.createTrackbar(laneSliderLabel, windowname, 1, 1, nothing)
     
     # Load sign symbols
     stop_sign = signs.load()[0]
@@ -153,8 +157,6 @@ def runProgram(model_type, video_file, logs_enabled, writeOutput=False):
                 boxes, labels, conf = yolo_predict(predictor, image)
                 frame = cocoBoxes(image, boxes, labels, conf)
 
-        
-
             # Get time after detection
             stats_core[2] = time.time()
             #  Display stats if selected with slider
@@ -172,7 +174,11 @@ def runProgram(model_type, video_file, logs_enabled, writeOutput=False):
                 logs = logger.writeLog(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
 
             # Lane detection
-            #frame = lanes.detect(frame)
+            if ("-lanes" in sys.argv):
+                lane_enabled = cv.getTrackbarPos(laneSliderLabel, windowname)
+
+                if (lane_enabled == 1):
+                    frame = lanes.detect(frame)
 
             # Display the resulting frame
             cv.imshow(windowname, frame)
@@ -193,13 +199,13 @@ def runProgram(model_type, video_file, logs_enabled, writeOutput=False):
         out.release()
     cv.destroyAllWindows()
 
-
 if __name__ == '__main__':
     # Allow no model or selected model
     supported_models = ["-ssdm", "-ssdmlite", "-ssdvgg", "-detr", "-fasterrcnn", "-yolov5s"]
     
     # Initialize log and write output variables
     logs_enabled = False
+    lane_detection = False
     writeOutput = False
 
     # Camera mode without a model
@@ -226,6 +232,10 @@ if __name__ == '__main__':
     elif (len(sys.argv) == 3 and (sys.argv[1] in supported_models)):
         model_type = sys.argv[1]
         video_file = sys.argv[2]
+    elif (len(sys.argv) == 4 and (sys.argv[1] in supported_models) and (sys.argv[3] == "-lanes")):
+        model_type = sys.argv[1]
+        video_file = sys.argv[2]
+        lane_detection = True
     elif (len(sys.argv) == 4 and (sys.argv[1] in supported_models) and (sys.argv[3] == "-l")):
             model_type = sys.argv[1]
             video_file = sys.argv[2]
@@ -235,13 +245,18 @@ if __name__ == '__main__':
             video_file = sys.argv[2]
             logs_enabled = True
             writeOutput = True
-
+    elif (len(sys.argv) == 6 and (sys.argv[1] in supported_models) and (sys.argv[3] == "-lanes") and (sys.argv[4] == "-l") and (sys.argv[5] == "-r")):
+            model_type = sys.argv[1]
+            video_file = sys.argv[2]
+            logs_enabled = True
+            writeOutput = True
+            lane_detection = True
     else:
-        print("\nUsage: <model> <video_filename> \nopt: \n-l :writes logs\n-r :writes video file\nAvailable models are: -ssdm, -ssdmlite, -fasterrcnn, -detr, -yolov5s\nTo just run the webcam provide no args.\n")
+        print("\nUsage: <model> <video_filename> \nopt: \n-l :writes logs\n-r :writes video file\n-lanes :lane detection\nAvailable models are: -ssdm, -ssdmlite, -fasterrcnn, -detr, -yolov5s\nTo just run the webcam provide no args.\n")
         exit()
 
     if (len(sys.argv) <= 2):
         print("Starting camera ... \nPress q to exit ")
     else:
         print("Starting video ... \nPress q to exit ")
-    runProgram(model_type, video_file, logs_enabled, writeOutput)
+    runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput)

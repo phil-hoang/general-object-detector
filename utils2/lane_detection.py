@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 
+
 def display_lines(image, lines):
     line_image = image
     try:

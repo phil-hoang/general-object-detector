@@ -39,6 +39,13 @@ run.py
 ```
 without any arguments just opens the webcam and displays its output.
 
+To enable lane detection use the argument `-lanes`:
+
+```
+run.py -yolov5s -lanes
+```
+
+
 To write information about the model like the minimum detection confidence or inference time to a file, use the optional argument `-l`. Example:
 
 ```
