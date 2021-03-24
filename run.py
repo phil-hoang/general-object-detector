@@ -33,15 +33,8 @@ import time
 import sys
 from pathlib import Path
 import torch
-from ssd_pytorch.ssd import ssdModel as ssd
-from detr.detr import detr_load as detr
-from detr.detr import detr_predict
-from faster_rcnn.fasterrcnn import fasterRcnnModel as frcnn
-from faster_rcnn.fasterrcnn import frcnn_predict
-from yolo.yolo import yoloModel as yolo
-from yolo.yolo import yolo_predict
-from visualizer.pascal import drawBoxes as pascalBoxes
-from visualizer.coco import draw_boxes as cocoBoxes
+
+from utils2.models import DetectionModel
 from visualizer.stats_core import showStats as showCoreStats
 from visualizer.stats_model import showStats as showModelStats
 import visualizer.signs as signs
@@ -60,16 +53,9 @@ def runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput
     sampleNumber = 1 # Default: 1
  
     #%% Model selection if chosen in command line
-    if ((model_type == "-ssdm") or (model_type == "-ssdmlite")):
-        net, predictor = ssd(model_type)
-    elif (model_type == "-fasterrcnn"):
-        predictor = frcnn()
-    elif (model_type == "-detr"):
-        predictor = detr()
-    elif (model_type == "-yolov5s"):
-        predictor = yolo()
-    else:
-        model_enabled = 0
+    if model_type:
+        model = DetectionModel(model_type)
+        model.load_model()
 
     # Prepare input and output
     if (video_file == None):
@@ -144,18 +130,8 @@ def runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput
         if ((counter % sampleNumber) == 0):
             counter = 0
             # Locate objects with model if selected
-            if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr" and model_type != "-fasterrcnn" and model_type != "-yolov5s"):
-                boxes, labels, conf = predictor.predict(image, 10, 0.4)
-                frame = pascalBoxes(image, conf, boxes, labels)
-            elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-detr"):
-                boxes, labels, conf = detr_predict(predictor, image)
-                frame = cocoBoxes(image, boxes, labels, conf)
-            elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-fasterrcnn"):
-                boxes, labels, conf = frcnn_predict(predictor, image)
-                frame = cocoBoxes(image, boxes, labels, conf)
-            elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-yolov5s"):
-                boxes, labels, conf = yolo_predict(predictor, image)
-                frame = cocoBoxes(image, boxes, labels, conf)
+            if (len(sys.argv) >= 2 and model_enabled == 1):
+                frame, boxes, labels, conf = model.model_predict(image)
 
             # Get time after detection
             stats_core[2] = time.time()
@@ -201,7 +177,7 @@ def runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput
 
 if __name__ == '__main__':
     # Allow no model or selected model
-    supported_models = ["-ssdm", "-ssdmlite", "-ssdvgg", "-detr", "-fasterrcnn", "-yolov5s"]
+    supported_models = ["-ssdm", "-ssdmlite", "-detr", "-fasterrcnn", "-yolov5s"]
     
     # Initialize log and write output variables
     logs_enabled = False
