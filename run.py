@@ -138,15 +138,15 @@ def runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput
             #  Display stats if selected with slider
             if (statsFlag == 1):
                 frame = showCoreStats(frame, stats_core) 
-            if (statsFlag == 1) and (model_enabled == 1):
+            if (statsFlag == 1) and (model_enabled == 1) and (model_type != "-detr-panoptic"):
                 frame, model_stats = showModelStats(frame, model_type, labels, conf)
 
             # Enable symbols
-            if (model_enabled == 1):
+            if (model_enabled == 1) and (model_type != "-detr-panoptic"):
                 frame = signs.showStopSign(frame, model_type, stop_sign, labels, conf)
             
             # Write logs if enables
-            if logs_enabled is True:
+            if logs_enabled is True  and (model_type != "-detr-panoptic"):
                 logs = logger.writeLog(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
 
             # Lane detection
@@ -175,9 +175,10 @@ def runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput
         out.release()
     cv.destroyAllWindows()
 
+
 if __name__ == '__main__':
     # Allow no model or selected model
-    supported_models = ["-ssdm", "-ssdmlite", "-detr", "-fasterrcnn", "-yolov5s"]
+    supported_models = ["-ssdm", "-ssdmlite", "-detr", "-fasterrcnn", "-yolov5s", "-detr-panoptic"]
     
     # Initialize log and write output variables
     logs_enabled = False
