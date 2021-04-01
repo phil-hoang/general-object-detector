@@ -17,6 +17,7 @@ import time
 import sys
 from pathlib import Path
 import argparse
+
 import cv2 as cv
 import torch
 
@@ -33,16 +34,12 @@ def nothing(x):
     pass
 
 #%%
-def run_program(model_type, video_file, lane_detection, write_output, enable_logs):
-    # Sets which frame to process. E.g. 10 means predict on every 10th frame only, 1 is for all processing all frames.
-    #TODO: Add this to arg
-    sample_number = 1 # Default: 1
- 
+def run_program(model_type, video_file, lane_detection, write_output, enable_logs, sample_number):
+    
     # Model selection if chosen in command line
     if model_type != None:
         model = Detection_Model(model_type)
         model.load_model()
-
 
     # Prepare input and output
     if (video_file is None):
@@ -50,7 +47,6 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
         cap = cv.VideoCapture(0)
         fps = cap.get(cv.CAP_PROP_FPS)
         dim = (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)) )
-
 
         if not cap.isOpened():
             print("ERROR! Cannot open camera")
@@ -67,33 +63,29 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             print("ERROR! Cannot read video. Does the file exist?")
             exit()
 
-
         output_name = video_file
 
         if model_type != None:
             output_name = output_name + "-" + str(model_type)
 
-
         if lane_detection is True:
-            output_name = output_name + "-lanes"
-    
+            output_name = output_name + "-lanes" 
 
     if write_output is True:
         # Create folder if it doesn't exist
         Path("media/ModelOutputs").mkdir(parents=True, exist_ok=True)
-        out = cv.VideoWriter('./media/ModelOutputs/' + output_name + '.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, dim)
-
+        out = cv.VideoWriter("./media/ModelOutputs/" + output_name 
+        + ".avi", cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, dim)
 
     # Create slider to turn stats and model on or off
-    slider = ['Show stats', 'Model OFF / ON', 'Lanes OFF / ON']
+    slider = ["Show stats", "Model OFF / ON", "Lanes OFF / ON"]
     if (video_file is None):
-        window_name = 'Live Detection'
-        
+        window_name = "Live Detection"
+
     else:
-        window_name = 'Video Detection file ' + video_file + '.mp4'
+        window_name = "Video Detection file " + video_file + ".mp4"
     cv.namedWindow(window_name)
-    cv.createTrackbar(slider[0], window_name, 1, 1, nothing)
-    
+    cv.createTrackbar(slider[0], window_name, 1, 1, nothing)    
 
     if (model_type != None):
         cv.createTrackbar(slider[1], window_name, 1, 1, nothing)
@@ -119,14 +111,17 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
 
         # Get a frame, convert to RGB and get frames per second fps
         ret, frame = cap.read()
+
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             break
+
         image = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         stats_core[0] = cap.get(cv.CAP_PROP_FPS)
 
-        # Set slider to turn on or off stats and enable or disable a model, if a model is selected
+        # Set slider to turn on or off stats and enable or disable a model
         stats_flag = cv.getTrackbarPos(slider[0], window_name)
+
         if (model_type != None):
             model_enabled = cv.getTrackbarPos(slider[1], window_name)
 
@@ -136,11 +131,18 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             if ((model_type != None) and (model_enabled == 1)):
                 frame, boxes, labels, conf = model.model_predict(image)
 
+            # Lane detection
+            if (lane_detection is True):
+                lane_enabled = cv.getTrackbarPos(slider[2], window_name)
+                if (lane_enabled == 1):
+                    frame = lanes.detect(frame)
+
             # Get time after detection
             stats_core[2] = time.time()
             #  Display stats if selected with slider
             if (stats_flag == 1):
                 frame = show_core_stats(frame, stats_core) 
+
             if ((stats_flag == 1) and (model_type != None) and (model_enabled == 1)):
                 frame, model_stats = show_model_stats(frame, model_type, labels, conf)
 
@@ -152,19 +154,13 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             if ((model_type != None) and (enable_logs is True)):
                 logs = logger.write_log(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
 
-            # Lane detection
-            if (lane_detection is True):
-                lane_enabled = cv.getTrackbarPos(slider[2], window_name)
-                if (lane_enabled == 1):
-                    frame = lanes.detect(frame)
-
             # Display the resulting frame
             cv.imshow(window_name, frame)
             if ((write_output == True)):
                 out.write(frame)
 
         counter = counter + 1
-        if cv.waitKey(1) == ord('q'):
+        if cv.waitKey(1) == ord("q"):
             break
     
     # Writing logs to file
@@ -184,10 +180,16 @@ if __name__ == '__main__':
 
     # Parse arguments
     parser = argparse.ArgumentParser(description='Select a model and test with camera or video file')
-    parser.add_argument('--model', default=None, choices=supported_models, help='Select a model. Available: <yolov5s>, <...>')
-    parser.add_argument('--f', default=None,help='Path to .mp4 video file')
-    parser.add_argument('-lanes', default=False, action='store_const', const=True, help='Enable lane detection')
-    parser.add_argument('-rec', default=False, action='store_const', const=True, help='Write result to .avi file and log data')
+    parser.add_argument('--model', default=None, choices=supported_models, 
+                        help='Select a model')
+    parser.add_argument('--f', default=None, help='Path to .mp4 video file')
+    parser.add_argument('--sample', default=1, 
+                        help="Sets on how many frames detection should be performed. 1 is on all frame, 2 every other etc.")
+    parser.add_argument('-lanes', default=False, action='store_const', const=True, 
+                        help='Enable lane detection')
+    parser.add_argument('-rec', default=False, action='store_const', const=True, 
+                        help='Write result to .avi file and log data')
+    
     args = parser.parse_args()
 
     model_type = args.model
@@ -195,6 +197,8 @@ if __name__ == '__main__':
     lane_detection = args.lanes
     write_output = args.rec
     enable_logs = args.rec
+    sample_number = int(args.sample)
+    print(sample_number)
 
     if (model_type is None and lane_detection is None and enable_logs is True):
         print("Recording and logging without a model is not supported!")
@@ -202,6 +206,8 @@ if __name__ == '__main__':
   
     if (video_file is False):
         print("Starting camera ... \nPress q to exit ")
+
     else:
         print("Starting video ... \nPress q to exit ")
-    run_program(model_type, video_file, lane_detection, write_output, enable_logs)
+
+    run_program(model_type, video_file, lane_detection, write_output, enable_logs, sample_number)
