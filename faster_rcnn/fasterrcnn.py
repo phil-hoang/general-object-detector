@@ -9,7 +9,7 @@ import torchvision.transforms as T
 import cv2 as cv
 
 
-def fasterRcnnModel():
+def faster_rcnn_model():
     """
     Loads the Faster R-CNN model from Pytorch
 

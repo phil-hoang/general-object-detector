@@ -7,7 +7,7 @@ For constants related to the COCO and Pascal dataset, see their modules in visua
 import cv2 as cv
 
 
-def statsFormat():
+def stats_format():
     """
     Returns a dict to select font type, font size and text colour.
     """
@@ -16,7 +16,7 @@ def statsFormat():
     return vis
 
 
-def modelStats():
+def model_stats():
     """
     Stats for the model. Is used to both diplay stats as well as to log the information.
     Returns a dictionary with empty value lists and the set keys.

@@ -18,7 +18,7 @@ def coco80_to_coco91_class(label):
 
     return x
 
-def yoloModel():
+def yolo_model():
     """
     Loads the YOLOv5 model from ultralytics
     """
