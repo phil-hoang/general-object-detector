@@ -38,10 +38,11 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
     #TODO: Add this to arg
     sample_number = 1 # Default: 1
  
-    #%% Model selection if chosen in command line
+    # Model selection if chosen in command line
     if model_type != None:
         model = Detection_Model(model_type)
         model.load_model()
+
 
     # Prepare input and output
     if (video_file is None):
@@ -49,38 +50,51 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
         cap = cv.VideoCapture(0)
         fps = cap.get(cv.CAP_PROP_FPS)
         dim = (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)) )
+
+
         if not cap.isOpened():
             print("ERROR! Cannot open camera")
             exit()
         output_name = "camera-" + str(model_type)
+
     else:
         # Video mode
         cap = cv.VideoCapture("media/DrivingClips/" + video_file + ".mp4")
         fps = cap.get(cv.CAP_PROP_FPS)
-        dim = (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)) )
+        dim = (int(cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
+
         if not cap.isOpened():
             print("ERROR! Cannot read video. Does the file exist?")
             exit()
+
+
         output_name = video_file
+
         if model_type != None:
             output_name = output_name + "-" + str(model_type)
+
+
         if lane_detection is True:
             output_name = output_name + "-lanes"
     
+
     if write_output is True:
         # Create folder if it doesn't exist
         Path("media/ModelOutputs").mkdir(parents=True, exist_ok=True)
         out = cv.VideoWriter('./media/ModelOutputs/' + output_name + '.avi', cv.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, dim)
 
+
     # Create slider to turn stats and model on or off
     slider = ['Show stats', 'Model OFF / ON', 'Lanes OFF / ON']
     if (video_file is None):
         window_name = 'Live Detection'
+        
     else:
         window_name = 'Video Detection file ' + video_file + '.mp4'
     cv.namedWindow(window_name)
     cv.createTrackbar(slider[0], window_name, 1, 1, nothing)
     
+
     if (model_type != None):
         cv.createTrackbar(slider[1], window_name, 1, 1, nothing)
     
