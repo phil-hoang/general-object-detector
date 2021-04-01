@@ -19,7 +19,7 @@ def load():
     return signs
 
 
-def showStopSign(frame, model_type, stop_sign, labels, conf):
+def show_stop_sign(frame, model_type, stop_sign, labels, conf):
     """
     Args:
     frame       -- Opencv frame object
@@ -32,7 +32,7 @@ def showStopSign(frame, model_type, stop_sign, labels, conf):
     """
     
     # COCO dataset
-    if (model_type in coco.supportedModels()):
+    if (model_type in coco.supported_models()):
         stop_sign_label = coco.labels()["stopsign"]
     # Pascal dataset
     else:
