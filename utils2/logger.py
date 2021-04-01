@@ -17,7 +17,7 @@ def initialize():
     logs    -- Dictionary with defined keys
     """
     # Get dict with model stats
-    stats_model = constants.modelStats()
+    stats_model = constants.model_stats()
     
     # Add inference time key and merge
     stats = {"inference_time":[]}
@@ -26,7 +26,7 @@ def initialize():
     return stats
 
 
-def writeLog(logs, time_begin, time_end, labels, conf, model_stats):
+def write_log(logs, time_begin, time_end, labels, conf, model_stats):
     """
     Writes log info into dictionary.
 
@@ -42,7 +42,7 @@ def writeLog(logs, time_begin, time_end, labels, conf, model_stats):
     logs        -- Updated dictionary with log information
     """
 
-    stats = constants.modelStats()
+    stats = constants.model_stats()
     logs["inference_time"].append(time_end - time_begin)
     
     for stat in stats:
@@ -51,7 +51,7 @@ def writeLog(logs, time_begin, time_end, labels, conf, model_stats):
     return logs
 
 
-def saveLogs(logs, name_in, model_type):
+def save_logs(logs, name_in, model_type, lane_detection):
     """
     Saves logs to disk.
     Default path is: dev/logs
@@ -65,7 +65,11 @@ def saveLogs(logs, name_in, model_type):
     if name_in is None:
         name_in = "camera"
 
-    name_in = name_in + "-"+ model_type[1:]
+    if model_type != None:
+        name_in = name_in + "-"+ model_type
+
+    if lane_detection is True:
+        name_in = name_in + "-lanes"
 
     # Set path out
     Path("logs").mkdir(parents=True, exist_ok=True)

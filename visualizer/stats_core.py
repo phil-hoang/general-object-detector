@@ -1,7 +1,7 @@
 import cv2 as cv
 from utils2 import constants
 
-def showStats(image, stats):
+def show_stats(image, stats):
     """
     Displays localization model independent stats in the image.
     The text is placed in the middle of the height and above.
@@ -23,7 +23,7 @@ def showStats(image, stats):
 
     # Put texts onto image
     for i in range(2):
-        cv.putText(image, texts[i], (5, int(image.shape[0]/2)-20+20*i), constants.statsFormat()["font"], 
-        constants.statsFormat()["fontsize"], constants.statsFormat()["colour"], 1)
+        cv.putText(image, texts[i], (5, int(image.shape[0]/2)-20+20*i), constants.stats_format()["font"], 
+        constants.stats_format()["fontsize"], constants.stats_format()["colour"], 1)
         
     return image
