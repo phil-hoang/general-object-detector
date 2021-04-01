@@ -48,6 +48,7 @@ import visualizer.signs as signs
 import utils2.logger as logger
 import utils2.constants as constants
 import utils2.lane_detection as lanes
+import utils2.distance as distance
 
 
 # Required for the slider
@@ -146,6 +147,7 @@ def runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput
             # Locate objects with model if selected
             if (len(sys.argv) >= 2 and model_enabled == 1 and model_type != "-detr" and model_type != "-fasterrcnn" and model_type != "-yolov5s"):
                 boxes, labels, conf = predictor.predict(image, 10, 0.4)
+                
                 frame = pascalBoxes(image, conf, boxes, labels)
             elif (len(sys.argv) >= 2 and model_enabled == 1 and model_type == "-detr"):
                 boxes, labels, conf = detr_predict(predictor, image)
@@ -179,6 +181,13 @@ def runProgram(model_type, video_file, lane_detection, logs_enabled, writeOutput
 
                 if (lane_enabled == 1):
                     frame = lanes.detect(frame)
+
+
+            # ===================== Estimate distances
+            frame = distance.estimate(frame, boxes)    
+            # ===================== 
+
+
 
             # Display the resulting frame
             cv.imshow(windowname, frame)
