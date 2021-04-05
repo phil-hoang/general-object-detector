@@ -131,6 +131,11 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             # Locate objects with model if selected
             if ((model_type != None) and (model_enabled == 1)):
                 frame, boxes, labels, conf = model.model_predict(image)
+            else:
+                # Needed to overwrite the boxes. They keep their state.
+                boxes = torch.tensor([])
+                labels = torch.tensor([])
+
 
             # Lane detection
             if (lane_detection is True):
@@ -157,7 +162,8 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
 
 
             # ===================== Estimate distances
-            frame = distance.estimate(frame, boxes)    
+            if len(boxes) > 0:
+                frame = distance.estimate(frame, boxes, model_type, labels)    
             # ===================== 
 
 
@@ -167,7 +173,7 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             if ((write_output == True)):
                 out.write(frame)
 
-        counter = counter + 1
+        counter += 1
         if cv.waitKey(1) == ord("q"):
             break
     
@@ -206,7 +212,6 @@ if __name__ == '__main__':
     write_output = args.rec
     enable_logs = args.rec
     sample_number = int(args.sample)
-    print(sample_number)
 
     if (model_type is None and lane_detection is None and enable_logs is True):
         print("Recording and logging without a model is not supported!")
