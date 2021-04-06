@@ -28,7 +28,7 @@ def yolo_model():
 
     return model
 
-def yolo_predict(model, frame, thresh = 0.5):
+def yolo_predict(model, frame, thresh = 0.6):
     """
     Predict with faster rcnn
 

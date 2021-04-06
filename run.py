@@ -35,7 +35,7 @@ def nothing(x):
     pass
 
 #%%
-def run_program(model_type, video_file, lane_detection, write_output, enable_logs, sample_number):
+def run_program(model_type, video_file, lane_detection, distance_approximation, write_output, enable_logs, sample_number):
     
     # Model selection if chosen in command line
     if model_type != None:
@@ -136,7 +136,6 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
                 boxes = torch.tensor([])
                 labels = torch.tensor([])
 
-
             # Lane detection
             if (lane_detection is True):
                 lane_enabled = cv.getTrackbarPos(slider[2], window_name)
@@ -160,13 +159,9 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             if ((model_type != None) and (enable_logs is True)):
                 logs = logger.write_log(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
 
-
-            # ===================== Estimate distances
-            if len(boxes) > 0:
-                frame = distance.estimate(frame, boxes, model_type, labels)    
-            # ===================== 
-
-
+            # Distance approximation
+            if ((distance_approximation is True) and (len(boxes) > 0)):
+                frame = distance.estimate(frame, boxes, model_type, labels, video_file)    
 
             # Display the resulting frame
             cv.imshow(window_name, frame)
@@ -201,6 +196,8 @@ if __name__ == '__main__':
                         help="Sets on how many frames detection should be performed. 1 is on all frame, 2 every other etc.")
     parser.add_argument('-lanes', default=False, action='store_const', const=True, 
                         help='Enable lane detection')
+    parser.add_argument('-distance', default=False, action='store_const', const=True, 
+                        help='Estimates distances of selected objects')
     parser.add_argument('-rec', default=False, action='store_const', const=True, 
                         help='Write result to .avi file and log data')
     
@@ -209,6 +206,7 @@ if __name__ == '__main__':
     model_type = args.model
     video_file = args.f
     lane_detection = args.lanes
+    distance_approximation = args.distance
     write_output = args.rec
     enable_logs = args.rec
     sample_number = int(args.sample)
@@ -223,4 +221,4 @@ if __name__ == '__main__':
     else:
         print("Starting video ... \nPress q to exit ")
 
-    run_program(model_type, video_file, lane_detection, write_output, enable_logs, sample_number)
+    run_program(model_type, video_file, lane_detection, distance_approximation, write_output, enable_logs, sample_number)
