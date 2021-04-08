@@ -1,6 +1,8 @@
 import numpy as np
 import cv2 as cv
 
+from utils2 import constants as constants
+
 
 def draw_boxes(image, boxes, labels, conf, thresh=0.9):
     """
@@ -23,11 +25,11 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
     labels_bike = [2]
 
     # Colours used for the bounding boxes
-    colour_motor = (255, 0, 0)
-    colour_person = (0, 0, 255)
-    colour_bike = (255,165,0)
-    colour_signs = (0, 255, 0)
-    colour_other = (220, 220, 220)
+    colour_motor = constants.box_colours()["motor"]
+    colour_person = constants.box_colours()["person"]
+    colour_bike = constants.box_colours()["bike"]
+    colour_signs = constants.box_colours()["signs"]
+    colour_other = constants.box_colours()["other"]
     
     # Iterate through each instance
     for i in range(len(conf)):
@@ -48,7 +50,8 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
             box = boxes[i, :]
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_other, 2)
 
-    image = cv.cvtColor(image, cv.COLOR_RGB2BGR)   
+    image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+    
     return image
 
 def supported_models():

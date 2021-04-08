@@ -27,6 +27,7 @@ from visualizer.stats_model import show_stats as show_model_stats
 import visualizer.signs as signs
 import utils2.logger as logger
 import utils2.lane_detection as lanes
+import utils2.distance as distance
 
 
 # Required for the slider
@@ -34,7 +35,7 @@ def nothing(x):
     pass
 
 #%%
-def run_program(model_type, video_file, lane_detection, write_output, enable_logs, sample_number):
+def run_program(model_type, video_file, lane_detection, distance_approximation, write_output, enable_logs, sample_number):
     
     # Model selection if chosen in command line
     if model_type != None:
@@ -69,7 +70,10 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             output_name = output_name + "-" + str(model_type)
 
         if lane_detection is True:
-            output_name = output_name + "-lanes" 
+            output_name = output_name + "-lanes"
+
+        if distance_approximation is True:
+             output_name = output_name + "-distances"
 
     if write_output is True:
         # Create folder if it doesn't exist
@@ -130,6 +134,10 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             # Locate objects with model if selected
             if ((model_type != None) and (model_enabled == 1)):
                 frame, boxes, labels, conf = model.model_predict(image)
+            else:
+                # Needed to overwrite the boxes. They keep their state.
+                boxes = torch.tensor([])
+                labels = torch.tensor([])
 
             # Lane detection
             if (lane_detection is True):
@@ -154,18 +162,22 @@ def run_program(model_type, video_file, lane_detection, write_output, enable_log
             if ((model_type != None) and (enable_logs is True)):
                 logs = logger.write_log(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
 
+            # Distance approximation
+            if ((distance_approximation is True) and (len(boxes) > 0)):
+                frame = distance.estimate(frame, boxes, model_type, labels, video_file)    
+
             # Display the resulting frame
             cv.imshow(window_name, frame)
             if ((write_output == True)):
                 out.write(frame)
 
-        counter = counter + 1
+        counter += 1
         if cv.waitKey(1) == ord("q"):
             break
     
     # Writing logs to file
     if enable_logs is True:
-        logger.save_logs(logs, video_file, model_type, lane_detection)
+        logger.save_logs(logs, video_file, model_type, lane_detection, distance_approximation)
 
     # When everything is done, release the capture
     cap.release()
@@ -187,6 +199,8 @@ if __name__ == '__main__':
                         help="Sets on how many frames detection should be performed. 1 is on all frame, 2 every other etc.")
     parser.add_argument('-lanes', default=False, action='store_const', const=True, 
                         help='Enable lane detection')
+    parser.add_argument('-distance', default=False, action='store_const', const=True, 
+                        help='Estimates distances of selected objects')
     parser.add_argument('-rec', default=False, action='store_const', const=True, 
                         help='Write result to .avi file and log data')
     
@@ -195,10 +209,10 @@ if __name__ == '__main__':
     model_type = args.model
     video_file = args.f
     lane_detection = args.lanes
+    distance_approximation = args.distance
     write_output = args.rec
     enable_logs = args.rec
     sample_number = int(args.sample)
-    print(sample_number)
 
     if (model_type is None and lane_detection is None and enable_logs is True):
         print("Recording and logging without a model is not supported!")
@@ -210,4 +224,4 @@ if __name__ == '__main__':
     else:
         print("Starting video ... \nPress q to exit ")
 
-    run_program(model_type, video_file, lane_detection, write_output, enable_logs, sample_number)
+    run_program(model_type, video_file, lane_detection, distance_approximation, write_output, enable_logs, sample_number)

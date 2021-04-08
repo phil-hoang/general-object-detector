@@ -11,7 +11,7 @@ The SSD model is taken from [here](https://github.com/qfgaohao/pytorch-ssd).
 The YOLO model is taken from [here](https://github.com/ultralytics/yolov5).
 
 
-![Example](media/detr-example.jpg)
+![Intersection scene](media/detr-example.jpg)
 
 
 ## Dependencies and setup
@@ -45,15 +45,28 @@ run.py
 ```
 without any arguments just opens the webcam and displays its output.
 
-To enable lane detection use the argument `-lanes`:
-
-```
-run.py --model yolov5s -lanes
-```
-
-
 To record the output to a file and write information about the model like the minimum detection confidence or inference time to a log file, use the optional argument `-rec`. Example:
 
 ```
 run.py --model ssdm --f video -rec
+```
+
+### Additional features
+In addition to object detection we have experimental, rule-based lane detection and distance approximation.
+
+
+![Distance approximation](media/distance-example.jpg)
+
+
+The distance approximation is based on the focal length of the camera. Consequently, we support this feature only on our test videos. To use it on other videos just add your camera's focal length. Then you can use distance approximation by typing `-distance`:
+
+```
+run.py --model yolov5s -distance
+```
+
+
+To enable lane detection use the argument `-lanes`:
+
+```
+run.py --model yolov5s -lanes
 ```

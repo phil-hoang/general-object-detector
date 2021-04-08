@@ -20,9 +20,9 @@ def draw_boxes(image, probs, boxes, labels):
     labels_motor = [6, 7, 14]
     labels_person = [2, 15]
 
-    colour_motor = (255, 0, 0)
-    colour_person = (0, 0, 255)
-    colour_other = (255, 165, 0)
+    colour_motor = constants.box_colours()["motor"]
+    colour_person = constants.box_colours()["person"]
+    colour_other = constants.box_colours()["other"]
 
     for i in range(boxes.size(0)):
                 # Filter for classes
