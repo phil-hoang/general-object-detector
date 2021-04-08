@@ -51,7 +51,7 @@ def write_log(logs, time_begin, time_end, labels, conf, model_stats):
     return logs
 
 
-def save_logs(logs, name_in, model_type, lane_detection):
+def save_logs(logs, name_in, model_type, lane_detection, distance_approximation):
     """
     Saves logs to disk.
     Default path is: dev/logs
@@ -70,6 +70,9 @@ def save_logs(logs, name_in, model_type, lane_detection):
 
     if lane_detection is True:
         name_in = name_in + "-lanes"
+    
+    if distance_approximation is True:
+        name_in = name_in + "-distances"
 
     # Set path out
     Path("logs").mkdir(parents=True, exist_ok=True)

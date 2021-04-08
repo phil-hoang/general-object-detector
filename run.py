@@ -70,7 +70,10 @@ def run_program(model_type, video_file, lane_detection, distance_approximation, 
             output_name = output_name + "-" + str(model_type)
 
         if lane_detection is True:
-            output_name = output_name + "-lanes" 
+            output_name = output_name + "-lanes"
+
+        if distance_approximation is True:
+             output_name = output_name + "-distances"
 
     if write_output is True:
         # Create folder if it doesn't exist
@@ -174,7 +177,7 @@ def run_program(model_type, video_file, lane_detection, distance_approximation, 
     
     # Writing logs to file
     if enable_logs is True:
-        logger.save_logs(logs, video_file, model_type, lane_detection)
+        logger.save_logs(logs, video_file, model_type, lane_detection, distance_approximation)
 
     # When everything is done, release the capture
     cap.release()

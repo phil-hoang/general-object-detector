@@ -69,7 +69,7 @@ def vehicles(frame, boxes, count, focal_length):
     vehicle_width = 2.0 # width [m]
 
     # Filter aspect ratio to prevent computing on vehicle side views. Round result to 5m.
-    if (width != None) and (height_to_width > .7):
+    if (width != None) and (height_to_width > .5):
         distance = np.around((vehicle_width * focal_length) / (width*5), decimals=0)*5
         bb_text = "{:.0f}m".format(distance)
         font = cv.FONT_HERSHEY_SIMPLEX
@@ -110,7 +110,7 @@ def pedestrians(frame, boxes, count, focal_length):
     pedestrian_width = .65 # width [m]
 
     # Filter aspect ratio to prevent computing on vehicle side views. Round result to 5m.
-    if (width != None) and (height_to_width > 2.2):
+    if (width != None) and (height_to_width > 1.8):
         distance = np.around((pedestrian_width * focal_length) / (width*5), decimals=0)*5
         
         bb_text = "{:.0f}m".format(distance)
@@ -140,6 +140,13 @@ def stop_signs(frame, boxes, count, focal_length):
     y1, y2 = box[1], box[3]
     width = x2 - x1
     height_to_width = (y2 - y1) / (x2 - x1)
+
+    # Compute ROI for boxes.
+    xmin = frame.shape[1] / 8
+    xmax = frame.shape[1] * 7 / 8 
+    
+    if x1 < xmin or x2 > xmax:
+        return frame
                
     # Parameter which work well. Assumption is a view from the rear.
     stopsign_width = .8 # width [m]
