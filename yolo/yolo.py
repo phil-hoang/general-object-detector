@@ -18,7 +18,7 @@ def coco80_to_coco91_class(label):
 
     return x
 
-def yoloModel():
+def yolo_model():
     """
     Loads the YOLOv5 model from ultralytics
     """
@@ -28,7 +28,7 @@ def yoloModel():
 
     return model
 
-def yolo_predict(model, frame, thresh = 0.5):
+def yolo_predict(model, frame, thresh = 0.6):
     """
     Predict with faster rcnn
 

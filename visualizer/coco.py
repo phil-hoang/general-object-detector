@@ -1,6 +1,8 @@
 import numpy as np
 import cv2 as cv
 
+from utils2 import constants as constants
+
 
 def draw_boxes(image, boxes, labels, conf, thresh=0.9):
     """
@@ -17,45 +19,46 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
     """
 
     # Class label indices
-    labelsMotor = [6, 3, 4, 8]
-    labelsPerson = [1]
-    labelsSigns = [10, 13]
-    labelsBike = [2]
+    labels_motor = [6, 3, 4, 8]
+    labels_person = [1]
+    labels_signs = [10, 13]
+    labels_bike = [2]
 
     # Colours used for the bounding boxes
-    colourMotor = (255, 0, 0)
-    colourPerson = (0, 0, 255)
-    colourBike = (255,165,0)
-    colourSigns = (0, 255, 0)
-    colourOther = (220, 220, 220)
+    colour_motor = constants.box_colours()["motor"]
+    colour_person = constants.box_colours()["person"]
+    colour_bike = constants.box_colours()["bike"]
+    colour_signs = constants.box_colours()["signs"]
+    colour_other = constants.box_colours()["other"]
     
     # Iterate through each instance
     for i in range(len(conf)):
          # Filter for classes
-        if (labels[i] in labelsMotor):
+        if (labels[i] in labels_motor):
             box = boxes[i, :]
-            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourPerson, 2)
-        elif (labels[i] in labelsPerson):
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_person, 2)
+        elif (labels[i] in labels_person):
             box = boxes[i, :]
-            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourMotor, 2)
-        elif (labels[i] in labelsBike):
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_motor, 2)
+        elif (labels[i] in labels_bike):
             box = boxes[i, :]
-            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourBike, 2)
-        elif (labels[i] in labelsSigns):
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_bike, 2)
+        elif (labels[i] in labels_signs):
             box = boxes[i, :]
-            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourSigns, 2)
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_signs, 2)
         else:
             box = boxes[i, :]
-            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colourOther, 2)
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_other, 2)
 
-    image = cv.cvtColor(image, cv.COLOR_RGB2BGR)   
+    image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+    
     return image
 
-def supportedModels():
+def supported_models():
     """
     Returns a list with the currently supported models.
     """
-    models = ["-fasterrcnn", "-detr", "-yolov5s"]
+    models = ["fasterrcnn", "detr", "yolov5s"]
 
     return models
 

@@ -4,7 +4,7 @@ from utils2 import constants
 from visualizer import coco, pascal
 
 
-def getMinMaxConf(conf, labels, label, model_stats, statsMin, statsMax):
+def get_min_max_conf(conf, labels, label, model_stats, stats_min, stats_max):
     """
     Gets the min and max confidence for the given class.
 
@@ -13,26 +13,26 @@ def getMinMaxConf(conf, labels, label, model_stats, statsMin, statsMax):
     labels      -- Torch tensor with label indices of varying length.
     label       -- Integer with class label, as a dict key.
     model_stats -- Dictionary with stats. Keys: numCars, confMinCars, confMaxCars, ... 
-    statsMin    -- String for min value name.
-    statsMax    -- String for max value name.
+    stats_min    -- String for min value name.
+    stats_max    -- String for max value name.
 
     Returns:
     model_stats -- Dict with the updated stats.
-    confClass   -- String with the formatted min and max confidence.
+    conf_class   -- String with the formatted min and max confidence.
     """
     if (len(conf[np.where(labels == label)])) > 0: 
-        model_stats[statsMin] = min(conf[np.where(labels == label)])
-        model_stats[statsMax] = max(conf[np.where(labels == label)])
-        confClass = '({:.2f}, {:.2f})'.format(model_stats[statsMin], model_stats[statsMax])
+        model_stats[stats_min] = min(conf[np.where(labels == label)])
+        model_stats[stats_max] = max(conf[np.where(labels == label)])
+        conf_class = '({:.2f}, {:.2f})'.format(model_stats[stats_min], model_stats[stats_max])
     else:
-        model_stats[statsMin] = None
-        model_stats[statsMax] = None
-        confClass = ""
+        model_stats[stats_min] = None
+        model_stats[stats_max] = None
+        conf_class = ""
 
-    return model_stats, confClass
+    return model_stats, conf_class
 
 
-def showStats(image, model_type, labels, conf):
+def show_stats(image, model_type, labels, conf):
     """
     Displays a count of selected objects in the image for both COCO and PASCAL data.
     
@@ -51,87 +51,87 @@ def showStats(image, model_type, labels, conf):
     labels = labels.numpy()
 
     # Initialize model_stats dictionary
-    model_stats = constants.modelStats()
+    model_stats = constants.model_stats()
 
     # COCO dataset
-    cocoModels = coco.supportedModels()
+    coco_models = coco.supported_models()
         
-    if (model_type in cocoModels):
+    if (model_type in coco_models):
         # Get labels
-        cocoLabels = coco.labels()
+        coco_labels = coco.labels()
 
-        labelList = ["car", "motorcycle", "bicycle", "person"]
-        statList = ["numCars", "numMotorCycles", "numBikes", "numPed"]
+        label_list = ["car", "motorcycle", "bicycle", "person"]
+        stat_list = ["numCars", "numMotorCycles", "numBikes", "numPed"]
 
         for i in range(4):
-            model_stats[statList[i]] = np.count_nonzero(labels == cocoLabels[labelList[i]])
+            model_stats[stat_list[i]] = np.count_nonzero(labels == coco_labels[label_list[i]])
 
-        model_stats["numTrucksBuses"] = np.count_nonzero(labels == cocoLabels["truck"]) + np.count_nonzero(labels == cocoLabels["bus"])
-        model_stats["numSign"] = np.count_nonzero(labels == cocoLabels["stopsign"]) + np.count_nonzero(labels == cocoLabels["stoplight"])
+        model_stats["numTrucksBuses"] = np.count_nonzero(labels == coco_labels["truck"]) + np.count_nonzero(labels == coco_labels["bus"])
+        model_stats["numSign"] = np.count_nonzero(labels == coco_labels["stopsign"]) + np.count_nonzero(labels == coco_labels["stoplight"])
 
         # Extract confidences abd 
-        model_stats, confCars = getMinMaxConf(conf, labels, cocoLabels["car"], model_stats, "confMinCars", "confMaxCars")
-        model_stats, confMotorCycles = getMinMaxConf(conf, labels, cocoLabels["motorcycle"], model_stats, "confMinMotorCycles", "confMaxMotorCycles")
-        model_stats, confBikes = getMinMaxConf(conf, labels, cocoLabels["bicycle"], model_stats, "confMinBikes", "confMaxBikes")
-        model_stats, confPed = getMinMaxConf(conf, labels, cocoLabels["person"], model_stats, "confMinPed", "confMaxPed")
+        model_stats, conf_cars = get_min_max_conf(conf, labels, coco_labels["car"], model_stats, "confMinCars", "confMaxCars")
+        model_stats, conf_motor_cycles = get_min_max_conf(conf, labels, coco_labels["motorcycle"], model_stats, "confMinMotorCycles", "confMaxMotorCycles")
+        model_stats, conf_bikes = get_min_max_conf(conf, labels, coco_labels["bicycle"], model_stats, "confMinBikes", "confMaxBikes")
+        model_stats, conf_ped = get_min_max_conf(conf, labels, coco_labels["person"], model_stats, "confMinPed", "confMaxPed")
 
         # Confidence for summarized classes. Currently they have to be handled seperatly.
-        if (len(conf[np.where(labels == cocoLabels["truck"])]) or len(conf[np.where(labels == cocoLabels["bus"])])) > 0:
-            res = np.append(np.where(labels == cocoLabels["truck"]), np.where(labels == cocoLabels["bus"]))
+        if (len(conf[np.where(labels == coco_labels["truck"])]) or len(conf[np.where(labels == coco_labels["bus"])])) > 0:
+            res = np.append(np.where(labels == coco_labels["truck"]), np.where(labels == coco_labels["bus"]))
             model_stats["confMinTrucksBuses"] = min(conf[res])
             model_stats["confMaxTrucksBuses"] = max(conf[res])
-            confTrucksBuses = '({:.2f}, {:.2f})'.format(model_stats["confMinTrucksBuses"], model_stats["confMaxTrucksBuses"])
+            conf_trucks_buses = '({:.2f}, {:.2f})'.format(model_stats["confMinTrucksBuses"], model_stats["confMaxTrucksBuses"])
         else:
             model_stats["confMinTrucksBuses"] = None
             model_stats["confMaxTrucksBuses"] = None
-            confTrucksBuses = ""
+            conf_trucks_buses = ""
 
-        if (len(conf[np.where(labels == cocoLabels["stopsign"])]) or len(conf[np.where(labels == cocoLabels["stoplight"])])) > 0:
-            res = np.append(np.where(labels == cocoLabels["stopsign"]), np.where(labels == cocoLabels["stoplight"]))
+        if (len(conf[np.where(labels == coco_labels["stopsign"])]) or len(conf[np.where(labels == coco_labels["stoplight"])])) > 0:
+            res = np.append(np.where(labels == coco_labels["stopsign"]), np.where(labels == coco_labels["stoplight"]))
             model_stats["confMinSigns"] = min(conf[res])    
             model_stats["confMaxSigns"] = max(conf[res])
-            confSigns = '({:.2f}, {:.2f})'.format(model_stats["confMinSigns"], model_stats["confMaxSigns"])
+            conf_signs = '({:.2f}, {:.2f})'.format(model_stats["confMinSigns"], model_stats["confMaxSigns"])
         else:
             model_stats["confMinSigns"] = None
             model_stats["confMaxSigns"] = None
-            confSigns = ""
+            conf_signs = ""
 
 
     # Pascal dataset
     else:
         # Get labels
-        pascalLabels = pascal.labels()
+        pascal_labels = pascal.labels()
 
-        labelList = ["car", "bus", "motorcycle", "bicycle", "person"]
-        statList = ["numCars", "numTrucksBuses", "numMotorCycles", "numBikes", "numPed"]
+        label_list = ["car", "bus", "motorcycle", "bicycle", "person"]
+        stat_list = ["numCars", "numTrucksBuses", "numMotorCycles", "numBikes", "numPed"]
 
         for i in range(5):
-            model_stats[statList[i]] = np.count_nonzero(labels == pascalLabels[labelList[i]])
+            model_stats[stat_list[i]] = np.count_nonzero(labels == pascal_labels[label_list[i]])
 
         model_stats["numSign"] = 0 # Not available in PASCAL!
 
         # Extract confidences
-        model_stats, confCars = getMinMaxConf(conf, labels, pascalLabels["car"], model_stats, "confMinCars", "confMaxCars")
-        model_stats, confTrucksBuses = getMinMaxConf(conf, labels, pascalLabels["bus"], model_stats, "confMinTrucksBuses", "confMaxTrucksBuses")
-        model_stats, confMotorCycles = getMinMaxConf(conf, labels, pascalLabels["motorcycle"], model_stats, "confMinMotorCycles", "confMaxMotorCycles")    
-        model_stats, confBikes = getMinMaxConf(conf, labels, pascalLabels["bicycle"], model_stats, "confMinBikes", "confMaxBikes")
-        model_stats, confPed = getMinMaxConf(conf, labels, pascalLabels["person"], model_stats, "confMinPed", "confMaxPed")
+        model_stats, conf_cars = get_min_max_conf(conf, labels, pascal_labels["car"], model_stats, "confMinCars", "confMaxCars")
+        model_stats, conf_trucks_buses = get_min_max_conf(conf, labels, pascal_labels["bus"], model_stats, "confMinTrucksBuses", "confMaxTrucksBuses")
+        model_stats, conf_motor_cycles = get_min_max_conf(conf, labels, pascal_labels["motorcycle"], model_stats, "confMinMotorCycles", "confMaxMotorCycles")    
+        model_stats, conf_bikes = get_min_max_conf(conf, labels, pascal_labels["bicycle"], model_stats, "confMinBikes", "confMaxBikes")
+        model_stats, conf_ped = get_min_max_conf(conf, labels, pascal_labels["person"], model_stats, "confMinPed", "confMaxPed")
   
         # No signs in Pascal
         model_stats["confMinSigns"] = None
         model_stats["confMaxSigns"] = None
-        confSigns = ""
+        conf_signs = ""
 
     # Format text
-    texts = ["cars: " + str(model_stats["numCars"]) + " " + confCars,
-    "trucks, buses: " + str(model_stats["numTrucksBuses"]) + " " + confTrucksBuses,
-    "motorcycles: " + str(model_stats["numMotorCycles"]) + " " + confMotorCycles,
-    "bicycles: " + str(model_stats["numBikes"]) + " " + confBikes,
-    "pedestrians: " + str(model_stats["numPed"]) + " " + confPed,
-    "signs: " + str(model_stats["numSign"]) + " " + confSigns]
+    texts = ["cars: " + str(model_stats["numCars"]) + " " + conf_cars,
+    "trucks, buses: " + str(model_stats["numTrucksBuses"]) + " " + conf_trucks_buses,
+    "motorcycles: " + str(model_stats["numMotorCycles"]) + " " + conf_motor_cycles,
+    "bicycles: " + str(model_stats["numBikes"]) + " " + conf_bikes,
+    "pedestrians: " + str(model_stats["numPed"]) + " " + conf_ped,
+    "signs: " + str(model_stats["numSign"]) + " " + conf_signs]
 
     # Place text
     for i in range(6):
-        cv.putText(image, texts[i], (5, int(image.shape[0]/2)+20+20*i), constants.statsFormat()["font"], constants.statsFormat()["fontsize"], constants.statsFormat()["colour"], 1)
+        cv.putText(image, texts[i], (5, int(image.shape[0]/2)+20+20*i), constants.stats_format()["font"], constants.stats_format()["fontsize"], constants.stats_format()["colour"], 1)
         
     return image, model_stats
