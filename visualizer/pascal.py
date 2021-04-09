@@ -1,4 +1,5 @@
 import cv2 as cv
+from utils2 import constants
 
 def draw_boxes(image, probs, boxes, labels):
     """
