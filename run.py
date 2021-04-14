@@ -199,7 +199,7 @@ if __name__ == '__main__':
                         help="Sets on how many frames detection should be performed. 1 is on all frame, 2 every other etc.")
     parser.add_argument('-lanes', default=False, action='store_const', const=True, 
                         help='Enable lane detection')
-    parser.add_argument('-distance', default=False, action='store_const', const=True, 
+    parser.add_argument('-distances', default=False, action='store_const', const=True, 
                         help='Estimates distances of selected objects')
     parser.add_argument('-rec', default=False, action='store_const', const=True, 
                         help='Write result to .avi file and log data')
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     model_type = args.model
     video_file = args.f
     lane_detection = args.lanes
-    distance_approximation = args.distance
+    distance_approximation = args.distances
     write_output = args.rec
     enable_logs = args.rec
     sample_number = int(args.sample)

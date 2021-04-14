@@ -28,13 +28,13 @@ def draw_boxes(image, probs, boxes, labels):
     for i in range(boxes.size(0)):
                 # Filter for classes
                 if (labels[i] in labels_motor):
-                    box = boxes[i, :]
+                    box = boxes[i, :].numpy()
                     cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_person, 2)
                 elif (labels[i] in labels_person):
-                    box = boxes[i, :]
+                    box = boxes[i, :].numpy()
                     cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_motor, 2)
                 else:
-                    box = boxes[i, :]
+                    box = boxes[i, :].numpy()
                     cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_other, 2)
     
     # Convert colour channels back to BGR

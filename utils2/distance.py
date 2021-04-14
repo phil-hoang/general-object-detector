@@ -49,7 +49,7 @@ def vehicles(frame, boxes, count, focal_length):
     Frame with overlaid distances
     """
     
-    box = boxes[count]
+    box = boxes[count].numpy()
     width = None
 
     # Get box dimensions.

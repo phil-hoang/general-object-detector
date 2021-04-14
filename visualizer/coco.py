@@ -35,19 +35,19 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
     for i in range(len(conf)):
          # Filter for classes
         if (labels[i] in labels_motor):
-            box = boxes[i, :]
+            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_person, 2)
         elif (labels[i] in labels_person):
-            box = boxes[i, :]
+            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_motor, 2)
         elif (labels[i] in labels_bike):
-            box = boxes[i, :]
+            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_bike, 2)
         elif (labels[i] in labels_signs):
-            box = boxes[i, :]
+            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_signs, 2)
         else:
-            box = boxes[i, :]
+            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_other, 2)
 
     image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
