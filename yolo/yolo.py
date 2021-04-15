@@ -14,7 +14,7 @@ def coco80_to_coco91_class(label):
                 64, 65, 67, 70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 84, 85, 86, 87, 88, 89, 90]
 
     x = [coco91_classes[i] for i in label]
-    x = torch.LongTensor(x)
+    x = torch.tensor(x, dtype=torch.long)
 
     return x
 

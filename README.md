@@ -58,10 +58,10 @@ In addition to object detection we have experimental, rule-based lane detection 
 ![Distance approximation](media/distance-example.jpg)
 
 
-The distance approximation is based on the focal length of the camera. Consequently, we support this feature only on our test videos. To use it on other videos just add your camera's focal length. Then you can use distance approximation by typing `-distance`:
+The distance approximation is based on the focal length of the camera. Consequently, we support this feature only on our test videos. To use it on other videos just add your camera's focal length. Then you can use distance approximation by typing `-distances`:
 
 ```
-run.py --model yolov5s -distance
+run.py --model yolov5s -distances
 ```
 
 
