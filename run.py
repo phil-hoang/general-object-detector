@@ -151,15 +151,15 @@ def run_program(model_type, video_file, lane_detection, distance_approximation, 
             if (stats_flag == 1):
                 frame = show_core_stats(frame, stats_core) 
 
-            if ((stats_flag == 1) and (model_type != None) and (model_enabled == 1)):
+            if ((stats_flag == 1) and (model_type != None) and (model_enabled == 1) and (model_type != "detrpanoptic")):
                 frame, model_stats = show_model_stats(frame, model_type, labels, conf)
 
             # Enable symbols
-            if ((model_type != None) and (model_enabled == 1)):
+            if ((model_type != None) and (model_enabled == 1) and (model_type != "detrpanoptic")):
                 frame = signs.show_stop_sign(frame, model_type, stop_sign, labels, conf)
             
             # Write logs if enables
-            if ((model_type != None) and (enable_logs is True)):
+            if ((model_type != None) and (enable_logs is True) and (model_type != "detrpanoptic")):
                 logs = logger.write_log(logs, stats_core[1], stats_core[2], labels, conf, model_stats)
 
             # Distance approximation
@@ -188,7 +188,7 @@ def run_program(model_type, video_file, lane_detection, distance_approximation, 
 
 if __name__ == '__main__':
     # Allow no model or selected model
-    supported_models = ["ssdm", "ssdmlite", "detr", "fasterrcnn", "yolov5s"]
+    supported_models = ["ssdm", "ssdmlite", "detr", "fasterrcnn", "yolov5s", "detrpanoptic"]
 
     # Parse arguments
     parser = argparse.ArgumentParser(description='Select a model and test with camera or video file')

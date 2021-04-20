@@ -1,6 +1,8 @@
 from ssd_pytorch.ssd import ssd_model as ssd
 from detr.detr import detr_load as detr
 from detr.detr import detr_predict
+from detr.detr_panoptic import detr_panoptic_load as detr_panoptic
+from detr.detr_panoptic import detr_panoptic_predict
 from faster_rcnn.fasterrcnn import faster_rcnn_model as frcnn
 from faster_rcnn.fasterrcnn import frcnn_predict
 from yolo.yolo import yolo_model as yolo
@@ -27,6 +29,8 @@ class Detection_Model:
             self.predictor = detr()
         elif (self.model_type == "yolov5s"):
             self.predictor = yolo()
+        elif (self.model_type == "detrpanoptic"):
+            self.predictor, self.postprocessor = detr_panoptic()
         else:
             print("Unable to load model. Valid models include ssdm, ssdmlite, fasterrcnn, detr, and yolov5s")
 
@@ -45,6 +49,9 @@ class Detection_Model:
         elif (self.model_type == "yolov5s"):
             boxes, labels, conf = yolo_predict(self.predictor, image)
             frame = coco_boxes(image, boxes, labels, conf)
+        elif (self.model_type == "detrpanoptic"):
+            frame = detr_panoptic_predict(self.predictor, self.postprocessor, image)
+            return frame, None, None, None
         else:
             raise Exception("Error: Model not loaded")
         
