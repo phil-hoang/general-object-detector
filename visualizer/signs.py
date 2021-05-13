@@ -33,7 +33,7 @@ def show_stop_sign(frame, model_type, stop_sign, labels, conf):
     
     # COCO dataset
     if (model_type in coco.supported_models()):
-        stop_sign_label = coco.labels()["stopsign"]
+        stop_sign_label = coco.label_names()["stopsign"]
     # Pascal dataset
     else:
         stop_sign_label = 50 # No stop sign in Pascal, so take index which is not available
