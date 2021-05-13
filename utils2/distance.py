@@ -183,13 +183,13 @@ def estimate(frame, boxes, model_type, labels, video_file):
         count = 0
 
         for label in labels:
-            if label in [coco.labels()["car"], coco.labels()["truck"], coco.labels()["bus"]]:
+            if label in [coco.label_names()["car"], coco.label_names()["truck"], coco.label_names()["bus"]]:
                 frame = vehicles(frame, boxes, count, focal_length)
 
-            elif label in [coco.labels()["person"]]:
+            elif label in [coco.label_names()["person"]]:
                 frame = pedestrians(frame, boxes, count, focal_length)
 
-            elif label in [coco.labels()["stopsign"]]:
+            elif label in [coco.label_names()["stopsign"]]:
                 frame = stop_signs(frame, boxes, count, focal_length)
 
             count += 1
@@ -198,10 +198,10 @@ def estimate(frame, boxes, model_type, labels, video_file):
         count = 0
 
         for label in labels:       
-            if label in [pascal.labels()["car"], coco.labels()["bus"]]:
+            if label in [pascal.label_names()["car"], coco.label_names()["bus"]]:
                 frame = vehicles(frame, boxes, count, focal_length)
 
-            elif label in [pascal.labels()["person"]]:
+            elif label in [pascal.label_names()["person"]]:
                 frame = pedestrians(frame, boxes, count, focal_length)
 
             count += 1

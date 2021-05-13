@@ -58,7 +58,7 @@ def show_stats(image, model_type, labels, conf):
         
     if (model_type in coco_models):
         # Get labels
-        coco_labels = coco.labels()
+        coco_labels = coco.label_names()
 
         label_list = ["car", "motorcycle", "bicycle", "person"]
         stat_list = ["numCars", "numMotorCycles", "numBikes", "numPed"]

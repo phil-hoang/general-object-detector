@@ -6,9 +6,11 @@ from detr.detr_panoptic import detr_panoptic_predict
 from faster_rcnn.fasterrcnn import faster_rcnn_model as frcnn
 from faster_rcnn.fasterrcnn import frcnn_predict
 from yolo.yolo import yolo_model as yolo
-from yolo.yolo import yolo_predict
+from yolo.yolo import yolo_model_traffic as yolo_traffic
+from yolo.yolo import yolo_predict, yolo_traffic_predict
 from visualizer.pascal import draw_boxes as pascal_boxes
 from visualizer.coco import draw_boxes as coco_boxes
+import torch
 
 class Detection_Model:
     def __init__(self, model_type):
@@ -29,6 +31,8 @@ class Detection_Model:
             self.predictor = detr()
         elif (self.model_type == "yolov5s"):
             self.predictor = yolo()
+        elif (self.model_type == "yolov5sTraffic"):
+            self.predictor = yolo_traffic()
         elif (self.model_type == "detrpanoptic"):
             self.predictor, self.postprocessor = detr_panoptic()
         else:
@@ -48,6 +52,9 @@ class Detection_Model:
             frame = coco_boxes(image, boxes, labels, conf)
         elif (self.model_type == "yolov5s"):
             boxes, labels, conf = yolo_predict(self.predictor, image)
+            frame = coco_boxes(image, boxes, labels, conf)
+        elif (self.model_type == "yolov5sTraffic"):
+            boxes, labels, conf = yolo_traffic_predict(self.predictor, image)
             frame = coco_boxes(image, boxes, labels, conf)
         elif (self.model_type == "detrpanoptic"):
             frame = detr_panoptic_predict(self.predictor, self.postprocessor, image)

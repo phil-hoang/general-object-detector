@@ -1,13 +1,6 @@
 """
 Main code to use different models with a webcam or a video file.
 
-Currently supported models and arguments to call it:
-SSD with Mobilenet          | -ssdm
-SSD with Mobilenet Lite     | -ssdmlite
-YOLO v5s                    | -yolo 
-DETR with Resnet50          | -detr
-Faster R-CNN with Resnet50  | -fasterrcnn
-
 The ssd model is from: https://github.com/qfgaohao/pytorch-ssd
 Yolo model is from here: https://github.com/ultralytics/yolov5
 """
@@ -17,7 +10,6 @@ import time
 import sys
 from pathlib import Path
 import argparse
-
 import cv2 as cv
 import torch
 
@@ -188,7 +180,7 @@ def run_program(model_type, video_file, lane_detection, distance_approximation, 
 
 if __name__ == '__main__':
     # Allow no model or selected model
-    supported_models = ["ssdm", "ssdmlite", "detr", "fasterrcnn", "yolov5s", "detrpanoptic"]
+    supported_models = ["ssdm", "ssdmlite", "detr", "fasterrcnn", "yolov5s", "yolov5sTraffic","detrpanoptic"]
 
     # Parse arguments
     parser = argparse.ArgumentParser(description='Select a model and test with camera or video file')
