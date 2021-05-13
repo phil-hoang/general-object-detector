@@ -49,7 +49,7 @@ def yolo_model():
 
 def yolo_model_traffic():
     """
-    Loads the YOLOv5 model from ultralytics
+    Loads the custom YOLOv5 model. It has to be placed into /yolo.
     """
 
     weights = 'yolo/yolov5sTraffic.pt'
