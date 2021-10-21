@@ -6,12 +6,6 @@ import cv2 as cv
 
 from PIL import Image
 from copy import deepcopy
-from detectron2.utils.visualizer import Visualizer
-from detectron2.config import get_cfg
-from detectron2.data import MetadataCatalog
-
-import panopticapi
-from panopticapi.utils import id2rgb, rgb2id
 
 def detr_panoptic_load():
     """
@@ -19,6 +13,7 @@ def detr_panoptic_load():
 
     Returns: the detr model pretrained on COCO dataset
     """
+
     model, postprocessor = torch.hub.load('facebookresearch/detr', 'detr_resnet50_panoptic', pretrained=True, return_postprocessor=True, num_classes=250)
     model.eval()
 
@@ -40,6 +35,17 @@ def detr_panoptic_predict(model, postprocessor, image):
     labels      -- Torch tensor of index labels for each bounding box [<label indices>]
     scores      -- Torch tensor of class confidence scores for each bounding box [<class scores>]. For COCO, expects 91 different classes 
     """
+
+    # Import libraries for segmentation visualization
+    try:
+        from detectron2.utils.visualizer import Visualizer
+        from detectron2.config import get_cfg
+        from detectron2.data import MetadataCatalog
+
+        import panopticapi
+        from panopticapi.utils import id2rgb, rgb2id
+    except ModuleNotFoundError:
+        print("ImportError: detectron2 or panopticapi not found. Please make sure that those libraries are installed.")
 
     # Preprocess image
     transform = T.Compose([
