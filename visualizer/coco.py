@@ -34,22 +34,17 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
     
     # Iterate through each instance
     for i in range(len(conf)):
+        box = list(map(int, boxes[i, :]))
          # Filter for classes
         if (labels[i] in labels_motor):
-            box = boxes[i, :].numpy()
-            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_person, 2)
-        elif (labels[i] in labels_person):
-            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_motor, 2)
+        elif (labels[i] in labels_person):
+            cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_person, 2)
         elif (labels[i] in labels_bike):
-            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_bike, 2)
         elif (labels[i] in labels_signs):
-            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_signs, 2)
         elif (labels[i] in labels_traffic_lights):
-            box = boxes[i, :].numpy()
-            
             # Set colours
             colour_traffic_lights = {92:(255,0,0), 93:(0,100,0), 94:(255,255,255)}
             colour = colour_traffic_lights[int(labels[i].numpy())]
@@ -67,7 +62,6 @@ def draw_boxes(image, boxes, labels, conf, thresh=0.9):
             cv.putText(image, bb_text, (box[0],int(box[1]-5)), font, 0.6, (255,255,255),1)
         
         else:
-            box = boxes[i, :].numpy()
             cv.rectangle(image, (box[0], box[1]), (box[2], box[3]), colour_other, 2)
 
     image = cv.cvtColor(image, cv.COLOR_RGB2BGR)

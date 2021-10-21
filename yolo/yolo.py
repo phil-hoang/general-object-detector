@@ -42,7 +42,7 @@ def yolo_model():
     Loads the YOLOv5 model from ultralytics
     """
 
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True).autoshape()
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True, force_reload = True)
     model.eval()
 
     return model
@@ -86,7 +86,6 @@ def yolo_predict(model, frame, thresh = 0.6):
     boxes = boxes[keep]
     conf = conf[keep]
     labels = labels[keep]
-    print(labels)
 
     # Convert COCO labels because some classes were removed
     labels = coco80_to_coco91_class(labels)
